@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 · Temporyn-Wiki</title>
+  <meta name="description" content="Temporyn-Wiki 관리자">
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('temporyn-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    :root{--bg-1:#f8f8ff;--tx-1:#1e1e2a;
+      --fm:'Fira Code','Pretendard',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    :root[data-theme="dark"]{--bg-1:#14141c;--tx-1:#ececf4}
+    html{background:var(--bg-1)}
+    body{margin:0;background:var(--bg-1);color:var(--tx-1);
+      font-family:var(--fm);font-size:15px;line-height:1.7}
+  </style>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="stylesheet" href="/assets/css/temporyn.css">
+  <style>
+    .admin { max-width: var(--read-w); margin: 0 auto; padding: 2.5rem var(--gutter) 4rem; }
+    .admin-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+    .admin-head h1 { color: var(--accent); margin: 0; font-size: 1.6rem; }
+    .admin-user { font-size: 13px; color: var(--tx-2); }
+    .admin-user strong { color: var(--tx-1); }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .admin-card { padding: 1.1rem 1.2rem; background: var(--bg-2); border-radius: 10px; }
+    .admin-card h2 { margin: 0 0 .4rem; font-size: 1rem; color: var(--accent); }
+    .admin-card p { margin: 0; font-size: 13px; color: var(--tx-2); }
+    .logout-btn {
+      padding: .45rem .8rem; font-family: inherit; font-size: 13px; font-weight: 700;
+      color: var(--bg-1); background: var(--accent); border: 0; border-radius: 8px; cursor: pointer;
+    }
+    .logout-btn:hover { filter: brightness(1.08); }
+  </style>
+</head>
+<body data-baseurl="">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">Temporyn-Wiki</a>
+      <nav class="topnav">
+        <a href="/">Wiki</a>
+        <form th:action="@{/logout}" method="post" style="margin:0">
+          <button type="submit" class="logout-btn">로그아웃</button>
+        </form>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin">
+    <div class="admin-head">
+      <h1>Admin Dashboard</h1>
+      <span class="admin-user">로그인: <strong th:text="${username}">admin</strong></span>
+    </div>
+
+    <p>관리자 전용 페이지입니다. 인증된 관리자만 접근할 수 있으며, 문서·API 관리 기능은 추후 데이터베이스 연동과 함께 구현됩니다.</p>
+
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h2>문서 관리</h2>
+        <p>temp — 준비 중</p>
+      </div>
+      <div class="admin-card">
+        <h2>카테고리</h2>
+        <p>temp — 준비 중</p>
+      </div>
+      <div class="admin-card">
+        <h2>검색 인덱스</h2>
+        <p>temp — 준비 중</p>
+      </div>
+      <div class="admin-card">
+        <h2>API 토큰</h2>
+        <p>temp — 준비 중</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/site.js" defer></script>
+</body>
+</html>

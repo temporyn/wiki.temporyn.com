@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인 · Temporyn-Wiki</title>
+  <meta name="description" content="Temporyn-Wiki">
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('temporyn-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    :root{--bg-1:#f8f8ff;--tx-1:#1e1e2a;
+      --fm:'Fira Code','Pretendard',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    :root[data-theme="dark"]{--bg-1:#14141c;--tx-1:#ececf4}
+    html{background:var(--bg-1)}
+    body{margin:0;background:var(--bg-1);color:var(--tx-1);
+      font-family:var(--fm);font-size:15px;line-height:1.7}
+  </style>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="stylesheet" href="/assets/css/temporyn.css">
+  <style>
+    .auth { max-width: 360px; margin: 0 auto; padding: 4rem var(--gutter); }
+    .auth h1 { color: var(--accent); margin: 0 0 1.5rem; font-size: 1.4rem; }
+    .auth form { display: flex; flex-direction: column; gap: .8rem; }
+    .auth label { font-size: 13px; color: var(--tx-2); display: block; margin-bottom: .3rem; }
+    .auth input[type="text"], .auth input[type="password"] {
+      width: 100%; padding: .55rem .7rem; font-family: inherit; font-size: 14px;
+      color: var(--tx-1); background: var(--bg-2); border: 0; border-radius: 8px;
+    }
+    .auth input:focus { outline: 2px solid var(--accent); }
+    .auth button {
+      margin-top: .5rem; padding: .6rem; font-family: inherit; font-size: 14px; font-weight: 700;
+      color: var(--bg-1); background: var(--accent); border: 0; border-radius: 8px; cursor: pointer;
+    }
+    .auth button:hover { filter: brightness(1.08); }
+    .auth .msg { font-size: 13px; padding: .5rem .1rem; }
+    .auth .msg-error { color: #dc2626; }
+    .auth .msg-info { color: var(--tx-2); }
+    .auth .back { display: inline-block; margin-top: 1.2rem; font-size: 13px; color: var(--tx-2); }
+  </style>
+</head>
+<body data-baseurl="">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">Temporyn-Wiki</a>
+    </div>
+  </header>
+
+  <main class="auth">
+    <h1>Admin Login</h1>
+
+    <p class="msg msg-error" th:if="${param.error}">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+    <p class="msg msg-info" th:if="${param.logout}">로그아웃되었습니다.</p>
+
+    <form th:action="@{/login}" method="post">
+      <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username"
+               autofocus spellcheck="false" required>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit">로그인</button>
+    </form>
+
+    <a class="back" href="/">← 돌아가기</a>
+  </main>
+
+  <script src="/assets/js/site.js" defer></script>
+</body>
+</html>
