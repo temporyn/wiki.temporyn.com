@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "WikiApplication (local)",
+            "request": "launch",
+            "mainClass": "com.temporyn.wiki.WikiApplication",
+            "vmArgs": "-Dspring.profiles.active=local"
+        }
+    ]
+}
