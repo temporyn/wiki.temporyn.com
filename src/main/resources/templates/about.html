@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not Yet · Temporyn-Wiki</title>
+  <meta name="description" content="Temporyn-Wiki">
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('temporyn-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    :root{--bg-1:#f8f8ff;--tx-1:#1e1e2a;
+      --fm:'Fira Code','Pretendard',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    :root[data-theme="dark"]{--bg-1:#14141c;--tx-1:#ececf4}
+    html{background:var(--bg-1)}
+    body{margin:0;background:var(--bg-1);color:var(--tx-1);
+      font-family:var(--fm);font-size:15px;line-height:1.7}
+  </style>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="preload" href="/assets/fonts/FiraCode-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/temporyn.css">
+</head>
+<body data-baseurl="">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="사이드바 열기">≡</button>
+      <a class="brand" href="/">Temporyn-Wiki</a>
+      <nav class="topnav">
+        <a href="/about/">About</a>
+        <button id="theme-toggle" class="theme-toggle" type="button"
+                aria-label="테마 전환" title="라이트/다크 전환">
+          <span class="theme-icon" aria-hidden="true"></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="search">
+        <input type="search" id="search-input" placeholder="search"
+               autocomplete="off" spellcheck="false" aria-label="search">
+      </div>
+      <div class="sidebar-scroll">
+        <nav class="nav" id="nav-tree" aria-label="문서 트리">
+          <ul class="tree">
+            <li class="tree-dir open" data-path="temp">
+              <button class="tree-toggle" type="button">
+                <span class="tree-caret" aria-hidden="true"></span>
+                <span class="tree-label">temp</span>
+                <span class="tree-count" title="문서 3개">3</span>
+              </button>
+              <ul class="tree">
+                <li class="tree-file" data-url="/temp/temp-01/"><a href="/temp/temp-01/">temp-01</a></li>
+                <li class="tree-file" data-url="/temp/temp-02/"><a href="/temp/temp-02/">temp-02</a></li>
+                <li class="tree-file" data-url="/temp/temp-03/"><a href="/temp/temp-03/">temp-03</a></li>
+              </ul>
+            </li>
+            <li class="tree-dir" data-path="temp-group">
+              <button class="tree-toggle" type="button">
+                <span class="tree-caret" aria-hidden="true"></span>
+                <span class="tree-label">temp-group</span>
+                <span class="tree-count" title="문서 2개">2</span>
+              </button>
+              <ul class="tree">
+                <li class="tree-file" data-url="/temp-group/temp-01/"><a href="/temp-group/temp-01/">temp-01</a></li>
+                <li class="tree-file" data-url="/temp-group/temp-02/"><a href="/temp-group/temp-02/">temp-02</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <ul class="search-results" id="search-results" hidden></ul>
+      </div>
+      <div class="sidebar-footer">&copy; temporyn</div>
+    </aside>
+
+    <main class="content">
+      <div class="placeholder">
+        <p class="temporary-page">kkmaddress@gmail.com</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="/assets/js/site.js" defer></script>
+</body>
+</html>
