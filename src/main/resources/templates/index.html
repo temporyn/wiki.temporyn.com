@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Not Yet · Temporyn-Wiki</title>
+  <title th:text="${article != null} ? ${article.title} + ' · Temporyn-Wiki' : 'Temporyn-Wiki'">Temporyn-Wiki</title>
   <meta name="description" content="Temporyn-Wiki">
 
   <script>
@@ -70,9 +70,14 @@
     </aside>
 
     <main class="content">
-      <div class="placeholder">
-        <p class="temporary-page">kkmaddress@gmail.com</p>
+      <div th:if="${article == null}" class="placeholder">
+        <p class="temporary-page">Temporary Page</p>
       </div>
+      <article th:if="${article != null}" class="doc">
+        <h1 class="doc-title" th:text="${article.title}">title</h1>
+        <p class="doc-path" th:text="${article.path}">path</p>
+        <div class="doc-body" th:utext="${article.content}">content</div>
+      </article>
     </main>
   </div>
 
