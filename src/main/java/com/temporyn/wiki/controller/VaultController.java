@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 사이드바에서 폴더/문서를 생성한다. 수정·삭제는 볼트에서 직접 처리한다. */
+/** 사이드바에서 폴더/문서를 만들고, 이름을 바꾸고, 옮긴다. 삭제는 볼트에서 직접 처리한다. */
 @RestController
 @RequestMapping("/api")
 public class VaultController {
@@ -25,10 +25,39 @@ public class VaultController {
 
     @PostMapping("/articles")
     public Map<String, String> createArticle(@RequestBody CreateRequest request) {
-        String path = vaultService.createArticle(request.parentPath(), request.name());
+        return viewResponse(vaultService.createArticle(request.parentPath(), request.name()));
+    }
+
+    @PostMapping("/directories/rename")
+    public Map<String, String> renameDirectory(@RequestBody RenameRequest request) {
+        return Map.of("path", vaultService.renameDirectory(request.path(), request.name()));
+    }
+
+    @PostMapping("/articles/rename")
+    public Map<String, String> renameArticle(@RequestBody RenameRequest request) {
+        return viewResponse(vaultService.renameArticle(request.path(), request.name()));
+    }
+
+    @PostMapping("/directories/move")
+    public Map<String, String> moveDirectory(@RequestBody MoveRequest request) {
+        return Map.of("path", vaultService.moveDirectory(request.path(), request.targetPath()));
+    }
+
+    @PostMapping("/articles/move")
+    public Map<String, String> moveArticle(@RequestBody MoveRequest request) {
+        return viewResponse(vaultService.moveArticle(request.path(), request.targetPath()));
+    }
+
+    private Map<String, String> viewResponse(String path) {
         return Map.of("path", path, "url", "/view/" + path);
     }
 
     public record CreateRequest(String parentPath, String name) {
+    }
+
+    public record RenameRequest(String path, String name) {
+    }
+
+    public record MoveRequest(String path, String targetPath) {
     }
 }

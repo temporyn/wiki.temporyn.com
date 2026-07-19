@@ -78,6 +78,92 @@ public class VaultService {
         return relative.substring(0, relative.length() - MARKDOWN_SUFFIX.length());
     }
 
+    /** 문서 내용 저장(덮어쓰기). */
+    public void writeArticle(String relativePath, String markdown) {
+        Path file = resolveArticle(relativePath);
+        try {
+            Files.writeString(file, markdown == null ? "" : markdown, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw failed("문서를 저장할 수 없습니다: " + e.getMessage());
+        }
+    }
+
+    /** 폴더 이름 변경. 반환값은 새 상대 경로. */
+    public String renameDirectory(String relativePath, String newName) {
+        Path source = resolveDirectory(relativePath);
+        return relativeOf(renameTo(source, validatedName(newName)));
+    }
+
+    /** 문서 이름 변경. 반환값은 확장자를 뺀 새 상대 경로. */
+    public String renameArticle(String relativePath, String newName) {
+        Path source = resolveArticle(relativePath);
+        Path renamed = renameTo(source, validatedName(newName) + MARKDOWN_SUFFIX);
+        return stripSuffix(relativeOf(renamed));
+    }
+
+    /** 폴더 이동. targetParentPath 가 비어 있으면 최상위로 옮긴다. */
+    public String moveDirectory(String relativePath, String targetParentPath) {
+        Path source = resolveDirectory(relativePath);
+        String normalizedTarget = targetParentPath == null ? "" : targetParentPath;
+        if (normalizedTarget.equals(relativePath) || normalizedTarget.startsWith(relativePath + "/")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "자기 자신이나 하위 폴더로 옮길 수 없습니다.");
+        }
+        return relativeOf(moveInto(source, normalizedTarget, source.getFileName().toString()));
+    }
+
+    /** 문서 이동. targetParentPath 가 비어 있으면 최상위로 옮긴다. */
+    public String moveArticle(String relativePath, String targetParentPath) {
+        Path source = resolveArticle(relativePath);
+        Path moved = moveInto(source, targetParentPath == null ? "" : targetParentPath,
+                source.getFileName().toString());
+        return stripSuffix(relativeOf(moved));
+    }
+
+    private Path renameTo(Path source, String newFileName) {
+        Path target = source.resolveSibling(newFileName).normalize();
+        return relocate(source, target);
+    }
+
+    private Path moveInto(Path source, String targetParentPath, String fileName) {
+        Path parent = targetParentPath.isBlank() ? root : root.resolve(targetParentPath).normalize();
+        if (!parent.startsWith(root) || !Files.isDirectory(parent)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "옮길 폴더를 찾을 수 없습니다.");
+        }
+        return relocate(source, parent.resolve(fileName).normalize());
+    }
+
+    private Path relocate(Path source, Path target) {
+        if (!target.startsWith(root)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 경로입니다.");
+        }
+        if (target.equals(source)) {
+            return source;
+        }
+        if (Files.exists(target)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름이 있습니다.");
+        }
+        try {
+            return Files.move(source, target);
+        } catch (IOException e) {
+            throw failed("옮길 수 없습니다: " + e.getMessage());
+        }
+    }
+
+    private Path resolveDirectory(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "최상위 폴더는 변경할 수 없습니다.");
+        }
+        Path dir = root.resolve(relativePath).normalize();
+        if (!dir.startsWith(root) || !Files.isDirectory(dir)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "폴더를 찾을 수 없습니다.");
+        }
+        return dir;
+    }
+
+    private String stripSuffix(String relative) {
+        return relative.substring(0, relative.length() - MARKDOWN_SUFFIX.length());
+    }
+
     private Path resolveNewChild(String parentPath, String fileName) {
         ensureRoot();
 

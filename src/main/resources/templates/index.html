@@ -36,6 +36,8 @@
   <link rel="preload" href="/assets/fonts/FiraCode-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/temporyn.css">
+  <link rel="stylesheet" href="/assets/vendor/easymde.min.css">
+  <link rel="stylesheet" href="/assets/css/editor.css">
 </head>
 <body data-baseurl="">
   <header class="topbar">
@@ -66,8 +68,9 @@
             <th:block th:each="child : ${tree.children}">
               <th:block th:replace="~{fragments/tree :: dirNode(${child})}"></th:block>
             </th:block>
-            <li class="tree-file" th:each="link : ${tree.articles}" th:data-url="${link.url}">
-              <a th:href="${link.url}" th:text="${link.title}">title</a>
+            <li class="tree-file" th:each="link : ${tree.articles}" th:data-url="${link.url}"
+                th:data-path="${link.path}" th:data-name="${link.title}">
+              <a th:href="${link.url}" th:text="${link.title}" draggable="true">title</a>
             </li>
           </ul>
         </nav>
@@ -77,13 +80,39 @@
     </aside>
 
     <main class="content">
-      <article th:if="${article != null}" class="doc">
-        <h1 class="doc-title" th:text="${article.title}">title</h1>
-        <p class="doc-path" th:text="${article.breadcrumb}">path</p>
+      <!-- 문서 편집 -->
+      <form th:if="${editing != null}" class="editor" method="post"
+            th:action="@{'/edit/' + ${editing.path}}">
+        <div class="doc-header">
+          <div>
+            <h1 class="doc-title" th:text="${editing.title}">title</h1>
+            <p class="doc-path" th:text="${editing.breadcrumb}">path</p>
+          </div>
+          <div class="md-tools">
+            <button type="button" id="md-toggle-side" class="md-tool">나란히 보기</button>
+            <button type="button" id="md-toggle-preview" class="md-tool">미리보기</button>
+          </div>
+        </div>
+        <textarea id="content" name="content" th:text="${editing.content}"></textarea>
+        <div class="editor-actions">
+          <button type="submit" class="btn-primary">저장</button>
+          <a class="btn-secondary" th:href="@{'/view/' + ${editing.path}}">취소</a>
+        </div>
+      </form>
+
+      <!-- 문서 조회 -->
+      <article th:if="${editing == null and article != null}" class="doc">
+        <div class="doc-header">
+          <div>
+            <h1 class="doc-title" th:text="${article.title}">title</h1>
+            <p class="doc-path" th:text="${article.breadcrumb}">path</p>
+          </div>
+          <a class="btn-secondary" th:href="@{'/edit/' + ${article.path}}">편집</a>
+        </div>
         <div class="doc-body" th:utext="${article.content}">content</div>
       </article>
 
-      <div th:if="${article == null}" class="placeholder">
+      <div th:if="${editing == null and article == null}" class="placeholder">
         <p class="temporary-page">Temporyn-Wiki</p>
       </div>
     </main>
@@ -93,5 +122,7 @@
 
   <script src="/assets/js/site.js" defer></script>
   <script src="/assets/js/tree-menu.js" defer></script>
+  <script src="/assets/vendor/easymde.min.js" defer></script>
+  <script src="/assets/js/md-editor.js" defer></script>
 </body>
 </html>

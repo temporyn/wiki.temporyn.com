@@ -1,5 +1,6 @@
 package com.temporyn.wiki.service;
 
+import com.temporyn.wiki.dto.ArticleEdit;
 import com.temporyn.wiki.dto.ArticleView;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,15 @@ public class ArticleService {
         String markdown = vaultService.readArticle(relativePath);
         return new ArticleView(relativePath, titleOf(relativePath), breadcrumbOf(relativePath),
                 markdownRenderer.toHtml(markdown));
+    }
+
+    public ArticleEdit getArticleEdit(String relativePath) {
+        String markdown = vaultService.readArticle(relativePath);
+        return new ArticleEdit(relativePath, titleOf(relativePath), breadcrumbOf(relativePath), markdown);
+    }
+
+    public void save(String relativePath, String markdown) {
+        vaultService.writeArticle(relativePath, markdown);
     }
 
     private String titleOf(String relativePath) {
