@@ -36,6 +36,7 @@
   <link rel="preload" href="/assets/fonts/FiraCode-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/temporyn.css">
+  <link rel="stylesheet" href="/assets/vendor/easymde.min.css">
   <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
 <body data-baseurl="">
@@ -90,8 +91,14 @@
         <label for="title">제목</label>
         <input type="text" id="title" th:field="*{title}" autocomplete="off" required>
 
-        <label for="content">내용 (Markdown)</label>
-        <textarea id="content" th:field="*{content}" spellcheck="false" required></textarea>
+        <div class="md-head">
+          <label for="content">내용</label>
+          <div class="md-tools">
+            <button type="button" id="md-toggle-side" class="md-tool">나란히 보기</button>
+            <button type="button" id="md-toggle-preview" class="md-tool">미리보기</button>
+          </div>
+        </div>
+        <textarea id="content" th:field="*{content}" spellcheck="false"></textarea>
 
         <input type="hidden" th:field="*{uploadToken}">
 
@@ -148,6 +155,8 @@
 
   <script src="/assets/js/site.js" defer></script>
   <script src="/assets/js/wiki-admin.js" defer></script>
+  <script src="/assets/vendor/easymde.min.js" defer></script>
+  <script src="/assets/js/md-editor.js" defer></script>
   <script src="/assets/js/admin-attachments.js" defer></script>
 </body>
 </html>
