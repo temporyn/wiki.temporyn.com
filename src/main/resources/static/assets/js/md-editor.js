@@ -49,20 +49,44 @@
     if (previewBtn) previewBtn.classList.toggle('is-active', editor.isPreviewActive());
   }
 
+  function refreshActivePreview() {
+    var wrapper = editor.codemirror.getWrapperElement();
+    if (!wrapper) return;
+    var activePreview = wrapper.parentNode.querySelector('.editor-preview-active-side, .editor-preview-active');
+    if (!activePreview) return;
+    renderPreview(editor.value(), activePreview);
+  }
+
   /* 활성 클래스가 setTimeout 안에서 붙으므로 레이아웃 반영 후 다시 측정한다. */
   function settleLayout() {
     requestAnimationFrame(function () {
       editor.codemirror.refresh();
       syncButtons();
-      setTimeout(function () { editor.codemirror.refresh(); syncButtons(); }, 60);
+      setTimeout(function () {
+        editor.codemirror.refresh();
+        syncButtons();
+        refreshActivePreview();
+      }, 60);
     });
   }
 
   if (sideBtn) {
-    sideBtn.addEventListener('click', function () { editor.toggleSideBySide(); settleLayout(); });
+    sideBtn.addEventListener('click', function () {
+      if (!editor.isSideBySideActive() && editor.isPreviewActive()) {
+        editor.togglePreview();
+      }
+      editor.toggleSideBySide();
+      settleLayout();
+    });
   }
   if (previewBtn) {
-    previewBtn.addEventListener('click', function () { editor.togglePreview(); settleLayout(); });
+    previewBtn.addEventListener('click', function () {
+      if (!editor.isPreviewActive() && editor.isSideBySideActive()) {
+        editor.toggleSideBySide();
+      }
+      editor.togglePreview();
+      settleLayout();
+    });
   }
 
   var form = field.closest('form');
