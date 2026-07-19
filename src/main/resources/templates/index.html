@@ -104,13 +104,8 @@
 
       <!-- 문서 조회 -->
       <article th:if="${editing == null and article != null}" class="doc">
-        <div class="doc-header">
-          <div>
-            <h1 class="doc-title" th:text="${article.title}">title</h1>
-            <p class="doc-path" th:text="${article.breadcrumb}">path</p>
-          </div>
-          <a class="btn-secondary" th:href="@{'/edit/' + ${article.path}}">편집</a>
-        </div>
+        <h1 class="doc-title" th:text="${article.title}">title</h1>
+        <p class="doc-path" th:text="${article.breadcrumb}">path</p>
         <div class="doc-body" th:utext="${article.content}">content</div>
       </article>
 

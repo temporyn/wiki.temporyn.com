@@ -141,14 +141,15 @@
         { label: '이름 변경', action: function () { renameDirectory(dPath, dName); } }
       ];
     } else {
+      /* 빈 공간에서만 트리 전체 조작을 제공한다. */
       items = [
         { label: '새 문서', action: function () { createArticle(''); } },
-        { label: '새 폴더', action: function () { createDirectory(''); } }
+        { label: '새 폴더', action: function () { createDirectory(''); } },
+        { label: '전체 펼치기', action: expandAll, separated: true },
+        { label: '전체 접기', action: collapseAll }
       ];
     }
 
-    items.push({ label: '전체 펼치기', action: expandAll, separated: true });
-    items.push({ label: '전체 접기', action: collapseAll });
     showMenu(e.pageX, e.pageY, items);
   });
 
