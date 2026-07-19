@@ -1,0 +1,62 @@
+/* Admin ─ Temporyn-Wiki 관리자 화면 전용 스타일 (temporyn.css 변수 재사용) */
+
+.logout-btn {
+  padding: .45rem .8rem; font-family: inherit; font-size: 13px; font-weight: 700;
+  color: var(--bg-1); background: var(--accent); border: 0; border-radius: 8px; cursor: pointer;
+}
+.logout-btn:hover { filter: brightness(1.08); }
+
+.admin { max-width: var(--page-w); margin: 0 auto; padding: 2.5rem var(--gutter) 4rem; }
+
+.admin-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+.admin-head h1 { color: var(--accent); margin: 0; font-size: 1.6rem; }
+.admin-user { font-size: 13px; color: var(--tx-2); }
+.admin-user strong { color: var(--tx-1); }
+
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+.admin-card { display: block; padding: 1.2rem 1.3rem; background: var(--bg-2); border-radius: 10px; color: inherit; }
+a.admin-card:hover { background: var(--bg-3); text-decoration: none; }
+.admin-card h2 { margin: 0 0 .5rem; font-size: 1rem; color: var(--accent); }
+.admin-card-meta { font-size: 13px; color: var(--tx-2); }
+
+.admin-back { display: inline-block; margin-bottom: 1rem; font-size: 13px; color: var(--tx-2); }
+.admin-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: .5rem 0 1rem; }
+.admin-toolbar h1 { color: var(--accent); margin: 0; font-size: 1.5rem; }
+
+.admin-table-wrap { width: 100%; overflow-x: auto; }
+.admin-table { display: table; table-layout: auto; width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.admin-table th, .admin-table td { text-align: left; padding: .55rem .7rem; border-bottom: 1px solid var(--guide); vertical-align: top; }
+.admin-table th { color: var(--tx-2); font-weight: 700; }
+.admin-table tbody tr:hover { background: var(--bg-2); }
+.admin-table .col-id { width: 60px; color: var(--tx-2); white-space: nowrap; }
+.admin-table .col-path { width: 100%; }
+.admin-table .col-count { white-space: nowrap; text-align: right; }
+.admin-table .col-actions { width: 140px; white-space: nowrap; }
+.admin-error { margin: 0 0 1rem; padding: .55rem .75rem; border-radius: 8px;
+  background: rgba(220, 38, 38, .12); color: #dc2626; font-size: 13px; }
+.admin-actions a { margin-right: .7rem; font-size: 12.5px; }
+.admin-actions button {
+  font-family: inherit; font-size: 12.5px; color: #dc2626; background: transparent;
+  border: 0; padding: 0; cursor: pointer;
+}
+.admin-actions button:hover { text-decoration: underline; }
+.admin-empty { padding: 2rem .7rem; color: var(--tx-2); font-size: 13.5px; }
+
+.admin-form { max-width: var(--read-w); }
+.admin-form-wide { max-width: none; }
+.admin-form-wide textarea { min-height: calc(100vh - 360px); }
+.admin-form label { display: block; margin: 1.1rem 0 .35rem; font-size: 13px; color: var(--tx-2); }
+.admin-form input[type="text"], .admin-form select, .admin-form textarea {
+  width: 100%; padding: .55rem .7rem; font-family: inherit; font-size: 14px;
+  color: var(--tx-1); background: var(--bg-2); border: 0; border-radius: 8px;
+}
+.admin-form textarea { min-height: 240px; resize: vertical; line-height: 1.6; }
+.admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { outline: 2px solid var(--accent); }
+.admin-form-actions { display: flex; gap: .7rem; align-items: center; margin-top: 1.5rem; }
+
+.btn-primary {
+  display: inline-block; padding: .55rem .9rem; font-family: inherit; font-size: 13px; font-weight: 700;
+  color: var(--bg-1); background: var(--accent); border: 0; border-radius: 8px; cursor: pointer; text-decoration: none;
+}
+.btn-primary:hover { filter: brightness(1.08); text-decoration: none; }
+.btn-secondary { font-size: 13px; color: var(--tx-2); }

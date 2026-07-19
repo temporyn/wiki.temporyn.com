@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head(${mode == 'edit'} ? '문서 편집 · Temporyn-Wiki' : '새 문서 · Temporyn-Wiki')}"></head>
+<body data-baseurl="">
+  <header th:replace="~{fragments/admin :: header}"></header>
+
+  <main class="admin">
+    <a class="admin-back" href="/admin/articles">← 문서 관리</a>
+    <div class="admin-toolbar">
+      <h1 th:text="${mode == 'edit'} ? '문서 편집' : '새 문서'">새 문서</h1>
+    </div>
+
+    <form class="admin-form admin-form-wide" method="post"
+          th:action="${mode == 'edit'} ? @{|/admin/articles/${articleId}|} : @{/admin/articles}"
+          th:object="${form}">
+      <label for="directoryId">디렉토리</label>
+      <select id="directoryId" th:field="*{directoryId}" required>
+        <option value="" disabled th:selected="*{directoryId == null}">디렉토리 선택</option>
+        <option th:each="dir : ${directories}" th:value="${dir.id}" th:text="${dir.path}">temp</option>
+      </select>
+
+      <label for="title">제목</label>
+      <input type="text" id="title" th:field="*{title}" autocomplete="off" required>
+
+      <label for="content">내용 (HTML)</label>
+      <textarea id="content" th:field="*{content}" spellcheck="false" required></textarea>
+
+      <div class="admin-form-actions">
+        <button type="submit" class="btn-primary">저장</button>
+        <a class="btn-secondary" href="/admin/articles">취소</a>
+      </div>
+    </form>
+  </main>
+
+  <script src="/assets/js/site.js" defer></script>
+</body>
+</html>

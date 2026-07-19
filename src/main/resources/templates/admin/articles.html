@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('문서 관리 · Temporyn-Wiki')}"></head>
+<body data-baseurl="">
+  <header th:replace="~{fragments/admin :: header}"></header>
+
+  <main class="admin">
+    <a class="admin-back" href="/admin">← Admin</a>
+    <div class="admin-toolbar">
+      <h1>문서 관리</h1>
+      <a class="btn-primary" href="/admin/articles/new">새 문서</a>
+    </div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th class="col-path">경로</th>
+            <th>제목</th>
+            <th class="col-actions">관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="row : ${articles}">
+            <td class="col-id" th:text="${row.id}">1</td>
+            <td class="col-path" th:text="${row.path}">temp</td>
+            <td>
+              <a th:href="@{|/view/${row.directoryId}/${row.id}|}" th:text="${row.title}">temp-01</a>
+            </td>
+            <td class="col-actions admin-actions">
+              <a th:href="@{|/admin/articles/${row.id}/edit|}">편집</a>
+              <form th:action="@{|/admin/articles/${row.id}/delete|}" method="post"
+                    style="display:inline" onsubmit="return confirm('이 문서를 삭제할까요?');">
+                <button type="submit">삭제</button>
+              </form>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(articles)}">
+            <td colspan="4" class="admin-empty">등록된 문서가 없습니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="/assets/js/site.js" defer></script>
+</body>
+</html>

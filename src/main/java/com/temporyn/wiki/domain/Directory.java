@@ -28,4 +28,17 @@ public class Directory {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
+
+    public static Directory create(String name, Long parentId, int sortOrder) {
+        Directory directory = new Directory();
+        directory.name = name;
+        directory.parentId = parentId;
+        directory.sortOrder = sortOrder;
+        return directory;
+    }
+
+    public void update(String name, Long parentId) {
+        this.name = name;
+        this.parentId = parentId;
+    }
 }

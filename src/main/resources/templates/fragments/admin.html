@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title}">Temporyn-Wiki</title>
+  <meta name="description" content="Temporyn-Wiki 관리자">
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('temporyn-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    :root{--bg-1:#f8f8ff;--tx-1:#1e1e2a;
+      --fm:'Fira Code','Pretendard',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    :root[data-theme="dark"]{--bg-1:#14141c;--tx-1:#ececf4}
+    html{background:var(--bg-1)}
+    body{margin:0;background:var(--bg-1);color:var(--tx-1);
+      font-family:var(--fm);font-size:15px;line-height:1.7}
+  </style>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="stylesheet" href="/assets/css/temporyn.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+  <header th:fragment="header" class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">Temporyn-Wiki</a>
+      <nav class="topnav">
+        <form th:action="@{/logout}" method="post" style="margin:0">
+          <button type="submit" class="logout-btn">로그아웃</button>
+        </form>
+      </nav>
+    </div>
+  </header>
+</body>
+</html>

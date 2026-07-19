@@ -31,4 +31,19 @@ public class Article {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
+
+    public static Article create(Long directoryId, String title, String content, int sortOrder) {
+        Article article = new Article();
+        article.directoryId = directoryId;
+        article.title = title;
+        article.content = content;
+        article.sortOrder = sortOrder;
+        return article;
+    }
+
+    public void update(Long directoryId, String title, String content) {
+        this.directoryId = directoryId;
+        this.title = title;
+        this.content = content;
+    }
 }
