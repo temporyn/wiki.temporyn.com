@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriUtils;
 
 /**
  * 파일시스템 볼트 접근. 폴더 = 디렉토리, *.md = 문서이며 정렬은 파일명 순서(Jekyll 방식)를 따른다.
@@ -208,6 +209,11 @@ public class VaultService {
         return root.relativize(path).toString().replace('\\', '/');
     }
 
+    /** 공백·한글이 들어간 파일명도 안전하도록 경로를 인코딩한다. */
+    private String viewUrl(String relativePath) {
+        return "/view/" + UriUtils.encodePath(relativePath, StandardCharsets.UTF_8);
+    }
+
     private Path resolveArticle(String relativePath) {
         if (relativePath == null || relativePath.isBlank()) {
             throw notFound();
@@ -240,7 +246,7 @@ public class VaultService {
             } else if (name.endsWith(MARKDOWN_SUFFIX)) {
                 String title = name.substring(0, name.length() - MARKDOWN_SUFFIX.length());
                 String articlePath = relativePath.isEmpty() ? title : relativePath + "/" + title;
-                articles.add(new ArticleLink(title, articlePath, "/view/" + articlePath));
+                articles.add(new ArticleLink(title, articlePath, viewUrl(articlePath)));
             }
         }
 

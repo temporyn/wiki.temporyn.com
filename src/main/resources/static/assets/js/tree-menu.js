@@ -29,12 +29,36 @@
   function fail(e) { alert(e.message || '오류가 발생했습니다.'); }
   function reload() { location.reload(); }
 
+  /* 현재 보고 있는(또는 편집 중인) 문서 경로 */
+  var currentPath = document.body.dataset.currentPath || '';
+  var currentMode = document.body.dataset.currentMode === 'edit' ? 'edit' : 'view';
+
+  /* 경로에 공백·한글이 있어도 안전하도록 세그먼트별로 인코딩한다. */
+  function pathUrl(path) {
+    return '/' + currentMode + '/' + path.split('/').map(encodeURIComponent).join('/');
+  }
+
+  /* 이름 변경·이동으로 현재 문서의 경로가 바뀌면 새 경로로 이동하고, 아니면 트리만 갱신한다. */
+  function followArticle(oldPath, newPath) {
+    if (currentPath === oldPath) location.href = pathUrl(newPath);
+    else reload();
+  }
+
+  function followDirectory(oldPath, newPath) {
+    if (currentPath === oldPath || currentPath.indexOf(oldPath + '/') === 0) {
+      location.href = pathUrl(newPath + currentPath.substring(oldPath.length));
+    } else {
+      reload();
+    }
+  }
+
   /* ── 생성 ──────────────────────────────────────────────────────────── */
   function createArticle(parentPath) {
     var name = prompt('새 문서 이름 (확장자 없이)');
     if (!name) return;
     post('/api/articles', { parentPath: parentPath, name: name })
-      .then(function (j) { location.href = j.url; }).catch(fail);
+      .then(function (j) { location.href = '/view/' + j.path.split('/').map(encodeURIComponent).join('/'); })
+      .catch(fail);
   }
 
   function createDirectory(parentPath) {
@@ -48,13 +72,14 @@
     var name = prompt('문서 이름 변경', current);
     if (name == null) return;
     post('/api/articles/rename', { path: path, name: name })
-      .then(function (j) { location.href = j.url; }).catch(fail);
+      .then(function (j) { followArticle(path, j.path); }).catch(fail);
   }
 
   function renameDirectory(path, current) {
     var name = prompt('폴더 이름 변경', current);
     if (name == null) return;
-    post('/api/directories/rename', { path: path, name: name }).then(reload).catch(fail);
+    post('/api/directories/rename', { path: path, name: name })
+      .then(function (j) { followDirectory(path, j.path); }).catch(fail);
   }
 
   /* ── 펼치기 / 접기 ─────────────────────────────────────────────────── */
@@ -100,7 +125,12 @@
     if (file) {
       var fPath = file.dataset.path, fName = file.dataset.name;
       items = [
-        { label: '수정', action: function () { location.href = '/edit/' + fPath; } },
+        {
+          label: '수정',
+          action: function () {
+            location.href = '/edit/' + fPath.split('/').map(encodeURIComponent).join('/');
+          }
+        },
         { label: '이름 변경', action: function () { renameArticle(fPath, fName); } }
       ];
     } else if (dir) {
@@ -167,8 +197,13 @@
 
     if (moving.type === 'directory' && dir && dir.dataset.path === moving.path) return;
 
-    var endpoint = moving.type === 'article' ? '/api/articles/move' : '/api/directories/move';
-    post(endpoint, { path: moving.path, targetPath: targetPath }).then(reload).catch(fail);
+    if (moving.type === 'article') {
+      post('/api/articles/move', { path: moving.path, targetPath: targetPath })
+        .then(function (j) { followArticle(moving.path, j.path); }).catch(fail);
+    } else {
+      post('/api/directories/move', { path: moving.path, targetPath: targetPath })
+        .then(function (j) { followDirectory(moving.path, j.path); }).catch(fail);
+    }
   });
 
   nav.addEventListener('dragend', function () { dragged = null; clearDropTargets(); });

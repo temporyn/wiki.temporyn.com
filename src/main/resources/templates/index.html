@@ -39,7 +39,9 @@
   <link rel="stylesheet" href="/assets/vendor/easymde.min.css">
   <link rel="stylesheet" href="/assets/css/editor.css">
 </head>
-<body data-baseurl="">
+<body data-baseurl=""
+      th:data-current-path="${editing != null} ? ${editing.path} : (${article != null} ? ${article.path} : '')"
+      th:data-current-mode="${editing != null} ? 'edit' : 'view'">
   <header class="topbar">
     <div class="topbar-inner">
       <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="사이드바 열기">≡</button>
