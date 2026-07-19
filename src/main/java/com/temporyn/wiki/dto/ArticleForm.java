@@ -10,4 +10,5 @@ public class ArticleForm {
     private Long directoryId;
     private String title;
     private String content;
+    private String uploadToken;
 }

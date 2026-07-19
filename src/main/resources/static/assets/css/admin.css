@@ -60,3 +60,29 @@ a.admin-card:hover { background: var(--bg-3); text-decoration: none; }
 }
 .btn-primary:hover { filter: brightness(1.08); text-decoration: none; }
 .btn-secondary { font-size: 13px; color: var(--tx-2); }
+
+/* 첨부파일 drag & drop */
+.dropzone {
+  margin-top: .35rem; padding: 1.6rem 1rem; text-align: center;
+  border: 2px dashed var(--code-border); border-radius: 10px; background: var(--bg-2);
+  color: var(--tx-2); font-size: 13.5px; transition: border-color .15s, background .15s;
+}
+.dropzone.dragover { border-color: var(--accent); background: var(--bg-3); color: var(--tx-1); }
+.dropzone-text { margin: 0; }
+.dropzone-pick {
+  font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--accent);
+  background: transparent; border: 0; padding: 0; cursor: pointer; text-decoration: underline;
+}
+.attach-list { list-style: none; margin: .8rem 0 0; padding: 0; }
+.attach-item {
+  display: flex; align-items: center; gap: .7rem; padding: .5rem .6rem;
+  border-bottom: 1px solid var(--guide); font-size: 13.5px;
+}
+.attach-item .attach-name { flex: 1 1 auto; word-break: break-all; }
+.attach-item .attach-size { flex: 0 0 auto; color: var(--tx-2); font-size: 12.5px; }
+.attach-item.attach-uploading { color: var(--tx-2); }
+.attach-remove {
+  flex: 0 0 auto; font-family: inherit; font-size: 12.5px; color: #dc2626;
+  background: transparent; border: 0; padding: 0; cursor: pointer;
+}
+.attach-remove:hover { text-decoration: underline; }

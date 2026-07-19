@@ -21,10 +21,15 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final DirectoryService directoryService;
+    private final MarkdownRenderer markdownRenderer;
+    private final AttachmentService attachmentService;
 
-    public ArticleService(ArticleRepository articleRepository, DirectoryService directoryService) {
+    public ArticleService(ArticleRepository articleRepository, DirectoryService directoryService,
+                          MarkdownRenderer markdownRenderer, AttachmentService attachmentService) {
         this.articleRepository = articleRepository;
         this.directoryService = directoryService;
+        this.markdownRenderer = markdownRenderer;
+        this.attachmentService = attachmentService;
     }
 
     public ArticleView getArticleView(Long directoryId, Long articleId) {
@@ -33,7 +38,9 @@ public class ArticleService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다.");
         }
         String path = directoryService.breadcrumb(article.getDirectoryId());
-        return new ArticleView(article.getId(), article.getTitle(), path, article.getContent());
+        String html = markdownRenderer.toHtml(article.getContent());
+        return new ArticleView(article.getId(), article.getTitle(), path, html,
+                attachmentService.listViews(article.getId()));
     }
 
     public List<ArticleRow> listRows() {
@@ -59,13 +66,16 @@ public class ArticleService {
     public Long create(ArticleForm form) {
         int nextOrder = articleRepository.findByDirectoryId(form.getDirectoryId()).size() + 1;
         Article article = Article.create(form.getDirectoryId(), form.getTitle(), form.getContent(), nextOrder);
-        return articleRepository.save(article).getId();
+        Long articleId = articleRepository.save(article).getId();
+        attachmentService.assignToArticle(form.getUploadToken(), articleId);
+        return articleId;
     }
 
     @Transactional
     public void update(Long articleId, ArticleForm form) {
         Article article = requireArticle(articleId);
         article.update(form.getDirectoryId(), form.getTitle(), form.getContent());
+        attachmentService.assignToArticle(form.getUploadToken(), articleId);
     }
 
     @Transactional
@@ -73,6 +83,7 @@ public class ArticleService {
         if (!articleRepository.existsById(articleId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다.");
         }
+        attachmentService.deleteForArticle(articleId);
         articleRepository.deleteById(articleId);
     }
 

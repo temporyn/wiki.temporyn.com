@@ -3,7 +3,10 @@ package com.temporyn.wiki.controller;
 import com.temporyn.wiki.dto.ArticleForm;
 import com.temporyn.wiki.dto.DirectoryForm;
 import com.temporyn.wiki.service.ArticleService;
+import com.temporyn.wiki.service.AttachmentService;
 import com.temporyn.wiki.service.DirectoryService;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,10 +24,13 @@ public class AdminController {
 
     private final ArticleService articleService;
     private final DirectoryService directoryService;
+    private final AttachmentService attachmentService;
 
-    public AdminController(ArticleService articleService, DirectoryService directoryService) {
+    public AdminController(ArticleService articleService, DirectoryService directoryService,
+                           AttachmentService attachmentService) {
         this.articleService = articleService;
         this.directoryService = directoryService;
+        this.attachmentService = attachmentService;
     }
 
     @GetMapping
@@ -43,9 +49,12 @@ public class AdminController {
 
     @GetMapping("/articles/new")
     public String newArticle(Model model) {
-        model.addAttribute("form", new ArticleForm());
+        ArticleForm form = new ArticleForm();
+        form.setUploadToken(UUID.randomUUID().toString());
+        model.addAttribute("form", form);
         model.addAttribute("directories", directoryService.listRows());
         model.addAttribute("mode", "create");
+        model.addAttribute("attachments", List.of());
         return "admin/article-form";
     }
 
@@ -57,10 +66,13 @@ public class AdminController {
 
     @GetMapping("/articles/{id}/edit")
     public String editArticle(@PathVariable Long id, Model model) {
-        model.addAttribute("form", articleService.getForm(id));
+        ArticleForm form = articleService.getForm(id);
+        form.setUploadToken(UUID.randomUUID().toString());
+        model.addAttribute("form", form);
         model.addAttribute("directories", directoryService.listRows());
         model.addAttribute("mode", "edit");
         model.addAttribute("articleId", id);
+        model.addAttribute("attachments", attachmentService.listViews(id));
         return "admin/article-form";
     }
 

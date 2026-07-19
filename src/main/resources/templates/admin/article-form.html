@@ -22,8 +22,23 @@
       <label for="title">제목</label>
       <input type="text" id="title" th:field="*{title}" autocomplete="off" required>
 
-      <label for="content">내용 (HTML)</label>
+      <label for="content">내용 (Markdown)</label>
       <textarea id="content" th:field="*{content}" spellcheck="false" required></textarea>
+
+      <input type="hidden" th:field="*{uploadToken}">
+
+      <label>첨부파일</label>
+      <div id="dropzone" class="dropzone">
+        <p class="dropzone-text">여기로 파일을 끌어다 놓거나 <button type="button" id="file-pick" class="dropzone-pick">파일 선택</button></p>
+        <input type="file" id="file-input" multiple hidden>
+      </div>
+      <ul id="attachment-list" class="attach-list">
+        <li th:each="att : ${attachments}" class="attach-item" th:data-id="${att.id}">
+          <a class="attach-name" th:href="${att.downloadUrl}" th:text="${att.filename}">file</a>
+          <span class="attach-size" th:text="${att.humanSize}">0 B</span>
+          <button type="button" class="attach-remove" th:data-id="${att.id}">제거</button>
+        </li>
+      </ul>
 
       <div class="admin-form-actions">
         <button type="submit" class="btn-primary">저장</button>
@@ -33,5 +48,6 @@
   </main>
 
   <script src="/assets/js/site.js" defer></script>
+  <script src="/assets/js/admin-attachments.js" defer></script>
 </body>
 </html>

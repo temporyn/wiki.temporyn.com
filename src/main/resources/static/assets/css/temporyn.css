@@ -263,6 +263,18 @@ table { border-collapse: collapse; width: 100%; margin: 1rem 0; display: block; 
 th, td { border: 1px solid var(--guide); padding: .4rem .6rem; }
 th { background: var(--bg-2); }
 
+/* ── Attachments (article viewer) ──────────────────────────────────────── */
+.doc-attachments { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--guide); }
+.doc-attachments-title { font-size: 1rem; color: var(--accent); margin: 0 0 .8rem; }
+.doc-attachments-list { list-style: none; margin: 0; padding: 0; }
+.doc-attachments-list li {
+  display: flex; align-items: center; gap: .6rem; padding: .5rem .6rem;
+  background: var(--bg-2); border-radius: 8px; margin-bottom: .4rem;
+}
+.doc-attachments-list li::before { content: "📎"; flex: 0 0 auto; font-size: 13px; }
+.doc-attachments-list a { flex: 1 1 auto; word-break: break-all; }
+.doc-attachment-size { flex: 0 0 auto; color: var(--tx-2); font-size: 12.5px; }
+
 /* ── Placeholder / Temporary Page ──────────────────────────────────────── */
 .placeholder {
   min-height: 60vh; display: flex; flex-direction: column;

@@ -77,6 +77,16 @@
         <h1 class="doc-title" th:text="${article.title}">title</h1>
         <p class="doc-path" th:text="${article.path}">path</p>
         <div class="doc-body" th:utext="${article.content}">content</div>
+
+        <section th:if="${not #lists.isEmpty(article.attachments)}" class="doc-attachments">
+          <h2 class="doc-attachments-title">첨부파일</h2>
+          <ul class="doc-attachments-list">
+            <li th:each="att : ${article.attachments}">
+              <a th:href="${att.downloadUrl}" th:text="${att.filename}">file</a>
+              <span class="doc-attachment-size" th:text="${att.humanSize}">0 B</span>
+            </li>
+          </ul>
+        </section>
       </article>
     </main>
   </div>
