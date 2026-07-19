@@ -1,23 +1,24 @@
 package com.temporyn.wiki.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
 
-    private static final String H2_CONSOLE_PATH = "/h2-console/**";
-
     private static final String[] PUBLIC_PATHS = {
             "/error",
             "/favicon.ico",
             "/assets/**",
-            "/login",
-            H2_CONSOLE_PATH
+            "/login"
     };
 
     @Bean
@@ -32,10 +33,20 @@ public class SecurityConfig {
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login")
-                        .permitAll())
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-                .csrf(csrf -> csrf.ignoringRequestMatchers(H2_CONSOLE_PATH));
+                        .permitAll());
         return http.build();
+    }
+
+    /** 관리자 계정은 설정(환경변수)으로 관리한다. 비밀번호는 BCrypt 해시를 그대로 넣는다. */
+    @Bean
+    UserDetailsService userDetailsService(
+            @Value("${app.admin.username}") String username,
+            @Value("${app.admin.password-hash}") String passwordHash) {
+        return new InMemoryUserDetailsManager(
+                User.withUsername(username)
+                        .password(passwordHash)
+                        .roles("ADMIN")
+                        .build());
     }
 
     @Bean

@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${article != null} ? ${article.title} + ' · Temporyn-Wiki' : 'Temporyn-Wiki'">Temporyn-Wiki</title>
   <meta name="description" content="Temporyn-Wiki">
-  <meta name="_csrf" th:content="${_csrf.token}">
-  <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
   <script>
     (function () {
@@ -36,8 +34,6 @@
   <link rel="preload" href="/assets/fonts/FiraCode-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/temporyn.css">
-  <link rel="stylesheet" href="/assets/vendor/easymde.min.css">
-  <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
 <body data-baseurl="">
   <header class="topbar">
@@ -65,9 +61,12 @@
       <div class="sidebar-scroll">
         <nav class="nav" id="nav-tree" aria-label="문서 트리">
           <ul class="tree">
-            <th:block th:each="root : ${tree}">
-              <th:block th:replace="~{fragments/tree :: dirNode(${root})}"></th:block>
+            <th:block th:each="child : ${tree.children}">
+              <th:block th:replace="~{fragments/tree :: dirNode(${child})}"></th:block>
             </th:block>
+            <li class="tree-file" th:each="link : ${tree.articles}" th:data-url="${link.url}">
+              <a th:href="${link.url}" th:text="${link.title}">title</a>
+            </li>
           </ul>
         </nav>
         <ul class="search-results" id="search-results" hidden></ul>
@@ -76,87 +75,18 @@
     </aside>
 
     <main class="content">
-      <!-- 문서 작성/편집 폼 -->
-      <form th:if="${articleForm != null}" class="admin-form admin-form-wide" method="post"
-            th:action="${formMode == 'edit'} ? @{|/articles/${articleId}|} : @{/articles}"
-            th:object="${articleForm}">
-        <h1 class="doc-title" th:text="${formMode == 'edit'} ? '문서 편집' : '새 문서'">새 문서</h1>
-
-        <label for="directoryId">디렉토리</label>
-        <select id="directoryId" th:field="*{directoryId}" required>
-          <option value="" disabled th:selected="*{directoryId == null}">디렉토리 선택</option>
-          <option th:each="dir : ${directories}" th:value="${dir.id}" th:text="${dir.path}">temp</option>
-        </select>
-
-        <label for="title">제목</label>
-        <input type="text" id="title" th:field="*{title}" autocomplete="off" required>
-
-        <div class="md-head">
-          <label for="content">내용</label>
-          <div class="md-tools">
-            <button type="button" id="md-toggle-side" class="md-tool">나란히 보기</button>
-            <button type="button" id="md-toggle-preview" class="md-tool">미리보기</button>
-          </div>
-        </div>
-        <textarea id="content" th:field="*{content}" spellcheck="false"></textarea>
-
-        <input type="hidden" th:field="*{uploadToken}">
-
-        <label>첨부파일</label>
-        <div id="dropzone" class="dropzone">
-          <p class="dropzone-text">여기로 파일을 끌어다 놓거나 <button type="button" id="file-pick" class="dropzone-pick">파일 선택</button></p>
-          <input type="file" id="file-input" multiple hidden>
-        </div>
-        <ul id="attachment-list" class="attach-list">
-          <li th:each="att : ${attachments}" class="attach-item" th:data-id="${att.id}">
-            <a class="attach-name" th:href="${att.downloadUrl}" th:text="${att.filename}">file</a>
-            <span class="attach-size" th:text="${att.humanSize}">0 B</span>
-            <button type="button" class="attach-remove" th:data-id="${att.id}">제거</button>
-          </li>
-        </ul>
-
-        <div class="admin-form-actions">
-          <button type="submit" class="btn-primary">저장</button>
-          <a class="btn-secondary" href="/">취소</a>
-        </div>
-      </form>
-
-      <!-- 문서 뷰어 -->
-      <article th:if="${articleForm == null and article != null}" class="doc">
-        <div class="doc-header">
-          <div>
-            <h1 class="doc-title" th:text="${article.title}">title</h1>
-            <p class="doc-path" th:text="${article.path}">path</p>
-          </div>
-          <a class="btn-secondary doc-edit" th:href="@{|/articles/${article.id}/edit|}">편집</a>
-        </div>
+      <article th:if="${article != null}" class="doc">
+        <h1 class="doc-title" th:text="${article.title}">title</h1>
+        <p class="doc-path" th:text="${article.breadcrumb}">path</p>
         <div class="doc-body" th:utext="${article.content}">content</div>
-
-        <section th:if="${not #lists.isEmpty(article.attachments)}" class="doc-attachments">
-          <h2 class="doc-attachments-title">첨부파일</h2>
-          <ul class="doc-attachments-list">
-            <li th:each="att : ${article.attachments}">
-              <a th:href="${att.downloadUrl}" th:text="${att.filename}">file</a>
-              <span class="doc-attachment-size" th:text="${att.humanSize}">0 B</span>
-            </li>
-          </ul>
-        </section>
       </article>
 
-      <!-- 빈 화면 -->
-      <div th:if="${articleForm == null and article == null}" class="placeholder">
+      <div th:if="${article == null}" class="placeholder">
         <p class="temporary-page">Temporyn-Wiki</p>
       </div>
     </main>
   </div>
 
-  <!-- 사이드바 우클릭 컨텍스트 메뉴 -->
-  <ul id="context-menu" class="context-menu" hidden></ul>
-
   <script src="/assets/js/site.js" defer></script>
-  <script src="/assets/js/wiki-admin.js" defer></script>
-  <script src="/assets/vendor/easymde.min.js" defer></script>
-  <script src="/assets/js/md-editor.js" defer></script>
-  <script src="/assets/js/admin-attachments.js" defer></script>
 </body>
 </html>
