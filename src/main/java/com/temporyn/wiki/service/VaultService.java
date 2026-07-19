@@ -53,6 +53,75 @@ public class VaultService {
         }
     }
 
+    /** 폴더 생성. 반환값은 볼트 상대 경로. */
+    public String createDirectory(String parentPath, String name) {
+        String folderName = validatedName(name);
+        Path target = resolveNewChild(parentPath, folderName);
+        try {
+            Files.createDirectories(target);
+        } catch (IOException e) {
+            throw failed("폴더를 만들 수 없습니다: " + e.getMessage());
+        }
+        return relativeOf(target);
+    }
+
+    /** 문서 생성. 반환값은 확장자를 뺀 볼트 상대 경로. */
+    public String createArticle(String parentPath, String name) {
+        String title = validatedName(name);
+        Path target = resolveNewChild(parentPath, title + MARKDOWN_SUFFIX);
+        try {
+            Files.writeString(target, "# " + title + System.lineSeparator(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw failed("문서를 만들 수 없습니다: " + e.getMessage());
+        }
+        String relative = relativeOf(target);
+        return relative.substring(0, relative.length() - MARKDOWN_SUFFIX.length());
+    }
+
+    private Path resolveNewChild(String parentPath, String fileName) {
+        ensureRoot();
+
+        Path parent = (parentPath == null || parentPath.isBlank())
+                ? root
+                : root.resolve(parentPath).normalize();
+        if (!parent.startsWith(root) || !Files.isDirectory(parent)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "상위 폴더를 찾을 수 없습니다.");
+        }
+
+        Path target = parent.resolve(fileName).normalize();
+        if (!target.startsWith(root)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 경로입니다.");
+        }
+        if (Files.exists(target)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름이 있습니다.");
+        }
+        return target;
+    }
+
+    /** 이름을 검증하고 앞뒤 공백을 제거해 돌려준다. */
+    private String validatedName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이름을 입력하세요.");
+        }
+        String trimmed = name.strip();
+        if (trimmed.startsWith(".") || trimmed.contains("/") || trimmed.contains("\\") || trimmed.contains("..")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용할 수 없는 이름입니다.");
+        }
+        return trimmed;
+    }
+
+    private void ensureRoot() {
+        try {
+            Files.createDirectories(root);
+        } catch (IOException e) {
+            throw failed("콘텐츠 디렉토리를 만들 수 없습니다: " + root);
+        }
+    }
+
+    private String relativeOf(Path path) {
+        return root.relativize(path).toString().replace('\\', '/');
+    }
+
     private Path resolveArticle(String relativePath) {
         if (relativePath == null || relativePath.isBlank()) {
             throw notFound();
@@ -66,6 +135,10 @@ public class VaultService {
 
     private ResponseStatusException notFound() {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다.");
+    }
+
+    private ResponseStatusException failed(String reason) {
+        return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, reason);
     }
 
     private DirectoryNode scan(Path dir, String relativePath) {

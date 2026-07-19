@@ -271,6 +271,9 @@ th { background: var(--bg-2); }
 }
 .context-menu li { padding: .45rem .6rem; border-radius: 6px; cursor: pointer; color: var(--tx-1); }
 .context-menu li:hover { background: var(--bg-3); }
+.context-menu li.context-menu-separated {
+  margin-top: .3rem; padding-top: .55rem; border-top: 1px solid var(--guide); border-radius: 0 0 6px 6px;
+}
 
 /* ── Logout ────────────────────────────────────────────────────────────── */
 .logout-btn {
