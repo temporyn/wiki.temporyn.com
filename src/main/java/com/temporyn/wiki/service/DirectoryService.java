@@ -75,25 +75,27 @@ public class DirectoryService {
         return directoryRepository.save(directory).getId();
     }
 
-    public DirectoryForm getForm(Long directoryId) {
-        Directory directory = directoryRepository.findById(directoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "디렉토리를 찾을 수 없습니다."));
-        DirectoryForm form = new DirectoryForm();
-        form.setName(directory.getName());
-        form.setParentId(directory.getParentId());
-        return form;
+    @Transactional
+    public void rename(Long directoryId, String name) {
+        if (name == null || name.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이름을 입력하세요.");
+        }
+        Directory directory = requireDirectory(directoryId);
+        directory.update(name.strip(), directory.getParentId());
     }
 
     @Transactional
-    public void update(Long directoryId, DirectoryForm form) {
-        Directory directory = directoryRepository.findById(directoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "디렉토리를 찾을 수 없습니다."));
-
-        Long parentId = form.getParentId();
-        if (parentId != null && descendantIds(directoryId).contains(parentId)) {
+    public void move(Long directoryId, Long newParentId) {
+        Directory directory = requireDirectory(directoryId);
+        if (newParentId != null && descendantIds(directoryId).contains(newParentId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "자기 자신이나 하위 디렉토리로 이동할 수 없습니다.");
         }
-        directory.update(form.getName(), parentId);
+        directory.update(directory.getName(), newParentId);
+    }
+
+    private Directory requireDirectory(Long directoryId) {
+        return directoryRepository.findById(directoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "디렉토리를 찾을 수 없습니다."));
     }
 
     private java.util.Set<Long> descendantIds(Long directoryId) {

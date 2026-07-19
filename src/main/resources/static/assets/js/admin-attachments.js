@@ -47,7 +47,7 @@
     data.append('token', token);
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/admin/attachments');
+    xhr.open('POST', '/attachments');
     xhr.setRequestHeader(csrfHeader, csrfToken);
     xhr.upload.addEventListener('progress', function (e) {
       if (e.lengthComputable) progress.textContent = Math.round((e.loaded / e.total) * 100) + '%';
@@ -73,7 +73,7 @@
 
   function remove(id, li) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/admin/attachments/' + id + '/delete');
+    xhr.open('POST', '/attachments/' + id + '/delete');
     xhr.setRequestHeader(csrfHeader, csrfToken);
     xhr.addEventListener('load', function () {
       if (xhr.status >= 200 && xhr.status < 300) list.removeChild(li);

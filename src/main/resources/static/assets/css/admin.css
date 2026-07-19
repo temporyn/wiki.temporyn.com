@@ -61,6 +61,20 @@ a.admin-card:hover { background: var(--bg-3); text-decoration: none; }
 .btn-primary:hover { filter: brightness(1.08); text-decoration: none; }
 .btn-secondary { font-size: 13px; color: var(--tx-2); }
 
+/* 사이드바 컨텍스트 메뉴 */
+.context-menu {
+  position: absolute; z-index: 100; min-width: 160px; margin: 0; padding: .3rem;
+  list-style: none; background: var(--bg-1); border: 1px solid var(--code-border);
+  border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); font-size: 13px;
+}
+.context-menu li { padding: .45rem .6rem; border-radius: 6px; cursor: pointer; color: var(--tx-1); }
+.context-menu li:hover { background: var(--bg-3); }
+
+/* 드래그 & 드롭 이동 대상 */
+.tree-dir.drop-target > .tree-toggle {
+  background: var(--sel); outline: 1px dashed var(--accent); outline-offset: -1px;
+}
+
 /* 첨부파일 drag & drop */
 .dropzone {
   margin-top: .35rem; padding: 1.6rem 1rem; text-align: center;

@@ -26,13 +26,13 @@ public class AttachmentController {
         this.attachmentService = attachmentService;
     }
 
-    @PostMapping("/admin/attachments")
+    @PostMapping("/attachments")
     public AttachmentView upload(@RequestParam("file") MultipartFile file,
                                  @RequestParam(value = "token", required = false) String token) {
         return attachmentService.store(file, token);
     }
 
-    @PostMapping("/admin/attachments/{id}/delete")
+    @PostMapping("/attachments/{id}/delete")
     public void delete(@PathVariable Long id) {
         attachmentService.delete(id);
     }

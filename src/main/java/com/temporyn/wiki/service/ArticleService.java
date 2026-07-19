@@ -2,13 +2,8 @@ package com.temporyn.wiki.service;
 
 import com.temporyn.wiki.domain.Article;
 import com.temporyn.wiki.dto.ArticleForm;
-import com.temporyn.wiki.dto.ArticleRow;
 import com.temporyn.wiki.dto.ArticleView;
 import com.temporyn.wiki.repository.ArticleRepository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ArticleService {
-
-    private static final Sort BY_ORDER = Sort.by(Sort.Direction.ASC, "sortOrder", "id");
 
     private final ArticleRepository articleRepository;
     private final DirectoryService directoryService;
@@ -43,16 +36,6 @@ public class ArticleService {
                 attachmentService.listViews(article.getId()));
     }
 
-    public List<ArticleRow> listRows() {
-        Map<Long, String> paths = directoryService.breadcrumbMap();
-        List<ArticleRow> rows = new ArrayList<>();
-        for (Article article : articleRepository.findAll(BY_ORDER)) {
-            rows.add(new ArticleRow(article.getId(), article.getDirectoryId(), article.getTitle(),
-                    paths.getOrDefault(article.getDirectoryId(), "")));
-        }
-        return rows;
-    }
-
     public ArticleForm getForm(Long articleId) {
         Article article = requireArticle(articleId);
         ArticleForm form = new ArticleForm();
@@ -76,6 +59,25 @@ public class ArticleService {
         Article article = requireArticle(articleId);
         article.update(form.getDirectoryId(), form.getTitle(), form.getContent());
         attachmentService.assignToArticle(form.getUploadToken(), articleId);
+    }
+
+    @Transactional
+    public void rename(Long articleId, String title) {
+        if (title == null || title.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제목을 입력하세요.");
+        }
+        Article article = requireArticle(articleId);
+        article.update(article.getDirectoryId(), title.strip(), article.getContent());
+    }
+
+    @Transactional
+    public void move(Long articleId, Long directoryId) {
+        Article article = requireArticle(articleId);
+        article.update(directoryId, article.getTitle(), article.getContent());
+    }
+
+    public Long directoryIdOf(Long articleId) {
+        return requireArticle(articleId).getDirectoryId();
     }
 
     @Transactional

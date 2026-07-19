@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <li th:fragment="dirNode(node)" class="tree-dir" th:data-path="${node.id}">
-    <button class="tree-toggle" type="button">
+  <li th:fragment="dirNode(node)" class="tree-dir" th:data-path="${node.id}"
+      th:data-id="${node.id}" data-type="dir" th:data-name="${node.name}">
+    <button class="tree-toggle" type="button" draggable="true">
       <span class="tree-caret" aria-hidden="true"></span>
       <span class="tree-label" th:text="${node.name}">name</span>
       <span class="tree-count" th:text="${node.articleCount}"
@@ -12,8 +13,9 @@
       <th:block th:each="child : ${node.children}">
         <th:block th:replace="~{fragments/tree :: dirNode(${child})}"></th:block>
       </th:block>
-      <li class="tree-file" th:each="link : ${node.articles}" th:data-url="${link.url}">
-        <a th:href="${link.url}" th:text="${link.title}">title</a>
+      <li class="tree-file" th:each="link : ${node.articles}" th:data-url="${link.url}"
+          th:data-id="${link.id}" data-type="file" th:data-name="${link.title}" th:data-dir-id="${node.id}">
+        <a th:href="${link.url}" th:text="${link.title}" draggable="true">title</a>
       </li>
     </ul>
   </li>
