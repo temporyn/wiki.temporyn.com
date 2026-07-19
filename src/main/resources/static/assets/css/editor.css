@@ -19,12 +19,13 @@
 
 .EasyMDEContainer .CodeMirror {
   min-height: calc(100vh - 320px);
-  padding: .9rem 1rem;
   font-family: var(--font-mono); font-size: 15px; line-height: 1.7;
   color: var(--tx-1); background: var(--bg-2);
   border: 0; border-radius: 10px;
 }
-.EasyMDEContainer .CodeMirror-scroll { min-height: calc(100vh - 320px); }
+.EasyMDEContainer .CodeMirror-lines { padding: .9rem 1rem; }
+.EasyMDEContainer .CodeMirror-scroll { min-height: calc(100vh - 320px); overflow-x: hidden !important; }
+.EasyMDEContainer .CodeMirror-hscrollbar { display: none !important; }
 .EasyMDEContainer .CodeMirror-cursor { border-left-color: var(--accent); }
 .EasyMDEContainer .CodeMirror-selected { background: var(--sel) !important; }
 .EasyMDEContainer .CodeMirror-placeholder { color: var(--tx-2); }
