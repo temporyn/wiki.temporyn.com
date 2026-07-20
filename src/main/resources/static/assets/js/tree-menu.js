@@ -259,6 +259,12 @@
     var dir = e.target.closest('.tree-dir');
     var items;
 
+    // Non-openable files (non-Markdown) have no actions and no owning-folder menu.
+    if (file && file.classList.contains('is-static')) {
+      hideMenu();
+      return;
+    }
+
     if (file) {
       var fPath = file.dataset.path, fName = file.dataset.name;
       items = [

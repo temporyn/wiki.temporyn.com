@@ -46,10 +46,13 @@ public class VaultTreeService {
             String childPath = relativePath.isEmpty() ? name : relativePath + "/" + name;
             if (Files.isDirectory(entry)) {
                 children.add(scan(entry, childPath));
-            } else {
+            } else if (name.endsWith(VaultPathResolver.MARKDOWN_SUFFIX)) {
                 String title = name.substring(0, name.length() - VaultPathResolver.MARKDOWN_SUFFIX.length());
                 String articlePath = relativePath.isEmpty() ? title : relativePath + "/" + title;
-                articles.add(new ArticleLink(title, articlePath, paths.viewUrl(articlePath)));
+                articles.add(new ArticleLink(title, articlePath, paths.viewUrl(articlePath), true));
+            } else {
+                // Non-Markdown files are listed and can be downloaded, but not opened as documents.
+                articles.add(new ArticleLink(name, childPath, paths.downloadUrl(childPath), false));
             }
         }
 
@@ -65,8 +68,6 @@ public class VaultTreeService {
         try (Stream<Path> stream = Files.list(dir)) {
             return stream
                     .filter(path -> !path.getFileName().toString().startsWith("."))
-                    .filter(path -> Files.isDirectory(path)
-                            || path.getFileName().toString().endsWith(VaultPathResolver.MARKDOWN_SUFFIX))
                     .sorted(Comparator
                             .comparing((Path path) -> Files.isDirectory(path) ? 0 : 1)
                             .thenComparing(path -> path.getFileName().toString(), String.CASE_INSENSITIVE_ORDER))

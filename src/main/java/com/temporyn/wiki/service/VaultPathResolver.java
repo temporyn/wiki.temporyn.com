@@ -118,6 +118,11 @@ public class VaultPathResolver {
         return "/view/" + UriUtils.encodePath(relativePath, StandardCharsets.UTF_8);
     }
 
+    /** Build the download URL for an arbitrary vault file. */
+    public String downloadUrl(String relativePath) {
+        return "/download/" + UriUtils.encodePath(relativePath, StandardCharsets.UTF_8);
+    }
+
     /** Validate a user-supplied file or folder name and return it trimmed. */
     public String validateName(String name) {
         if (name == null || name.isBlank()) {

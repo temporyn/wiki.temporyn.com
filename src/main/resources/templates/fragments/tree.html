@@ -12,9 +12,13 @@
       <th:block th:each="child : ${node.children}">
         <th:block th:replace="~{fragments/tree :: dirNode(${child})}"></th:block>
       </th:block>
-      <li class="tree-file" th:each="link : ${node.articles}" th:data-url="${link.url}"
+      <li class="tree-file" th:each="link : ${node.articles}"
+          th:classappend="${link.openable} ? '' : ' is-static'"
+          th:data-url="${link.openable} ? ${link.url} : null"
           th:data-path="${link.path}" th:data-name="${link.title}">
-        <a th:href="${link.url}" th:text="${link.title}" draggable="true">title</a>
+        <a th:if="${link.openable}" th:href="${link.url}" th:text="${link.title}" draggable="true">title</a>
+        <a th:unless="${link.openable}" class="tree-file-static" th:href="${link.url}"
+           th:text="${link.title}" download>title</a>
       </li>
     </ul>
   </li>

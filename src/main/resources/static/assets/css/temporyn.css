@@ -173,7 +173,7 @@ a:hover { text-decoration: underline; }
 .search-results .sr-cat { display: block; font-size: 11px; color: var(--tx-2); }
 .search-results .sr-empty { padding: .5rem; color: var(--tx-2); font-size: 13px; }
 
-/* ── Nav tree (긴 이름은 줄바꿈하여 전체 표시) ─────────────────────────── */
+/* ── Nav tree (long names wrap to show in full) ────────────────────────── */
 .nav ul { list-style: none; margin: 0; padding: 0; }
 .nav ul ul { margin-left: .55rem; border-left: 1px solid var(--guide); padding-left: .35rem; }
 
@@ -203,6 +203,13 @@ a:hover { text-decoration: underline; }
 }
 .tree-file a:hover { background: var(--bg-3); color: var(--tx-1); text-decoration: none; }
 .tree-file.active > a { color: var(--accent); font-weight: 700; background: var(--bg-3); }
+
+/* Non-openable files (non-Markdown): download-only, shown dimmed. */
+.tree-file-static {
+  display: block; padding: .3rem .4rem .3rem 1.15rem; font-size: 13.5px;
+  color: var(--tx-2); opacity: .6; word-break: break-word; cursor: pointer;
+}
+.tree-file-static:hover { background: var(--bg-3); color: var(--tx-1); opacity: 1; text-decoration: none; }
 
 /* ── Article ───────────────────────────────────────────────────────────── */
 .doc-title { margin: 0 0 .3rem; color: var(--accent); font-size: 1.75rem; }

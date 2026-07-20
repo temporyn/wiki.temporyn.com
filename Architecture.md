@@ -46,6 +46,7 @@ Package root: `com.temporyn.wiki`
 | `PageController` | MVC | `GET /`, `GET /view/**`, `GET /edit/**`, `POST /edit/**`, `GET /login` | `VaultTreeService`, `ArticleService` |
 | `VaultNodeController` | REST | `POST /api/directories`, `/api/articles` (+ `/rename`, `/move`, `/delete`) | `VaultNodeService` |
 | `MediaController` | REST | `POST /api/images`, `GET /media/**`, `POST /api/media/cleanup` | `MediaService` |
+| `FileController` | REST | `GET /download/**` (attachment download of any vault file) | `VaultPathResolver` |
 | `SearchController` | REST | `GET /api/search?q=` | `SearchService` |
 
 Controllers only parse/validate the HTTP shape and format the response; all
@@ -55,7 +56,7 @@ domain logic lives in services.
 | Class | Responsibility |
 |-------|----------------|
 | `VaultPathResolver` (`@Component`) | **Single source of truth for path resolution and security.** Owns the vault root, resolves article/directory/new-child/existing-file paths, guarantees every path stays within the root (no traversal), validates names, and builds view URLs. All other services depend on it. |
-| `VaultTreeService` | Scans the vault into the `DirectoryNode` tree for the sidebar (folders first, alphabetical). |
+| `VaultTreeService` | Scans the vault into the `DirectoryNode` tree for the sidebar (folders first, alphabetical). Markdown files are openable; other file types are listed and served as downloads (`/download/**`) but not opened as documents. |
 | `ArticleService` | Reads and writes a single article's Markdown; derives title/breadcrumb. |
 | `VaultNodeService` | Structural mutations: create / rename / move / delete for both folders and articles (including recursive folder delete). |
 | `MediaService` | Stores uploaded images under `.assets/`, resolves them for serving, and removes orphans not referenced by any document. |
@@ -70,7 +71,7 @@ safety, so responsibilities are clear and individually testable.
 | Record | Purpose |
 |--------|---------|
 | `DirectoryNode` | A folder node: name, path, article count, child folders, articles. |
-| `ArticleLink` | A sidebar link: title, path (no `.md`), view URL. |
+| `ArticleLink` | A sidebar file entry: title, path, view URL, and an `openable` flag (`true` for `.md`, `false` for other file types). |
 | `ArticleContent` | An article's raw Markdown plus title/breadcrumb (used for both view and edit). |
 | `SearchResult` | A search hit: title, path, url, snippet. |
 
