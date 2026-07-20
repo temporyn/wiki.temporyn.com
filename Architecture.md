@@ -25,8 +25,9 @@ Vault directory  (folders = sections, *.md = articles, .assets/ = images)
 - **Rendering model**: viewing and editing share one pipeline. Both load the raw
   Markdown and render it client-side with TipTap (`editable:false` for view,
   `editable:true` for edit). There is no server-side Markdown-to-HTML step.
-- **Auth**: a single admin account (form login, session cookie). Every route
-  except static assets and `/login` requires the `ADMIN` role.
+- **Auth**: a single admin account (form login, session cookie) with an optional
+  TOTP second factor. Every route except static assets and `/login` requires the
+  `ADMIN` role.
 
 ---
 
@@ -38,7 +39,7 @@ Package root: `com.temporyn.wiki`
 | Class | Responsibility |
 |-------|----------------|
 | `WikiApplication` | Spring Boot entry point. |
-| `config.SecurityConfig` | Form login, public paths (`/assets/**`, `/lib/**`, `/login`, `/error`, `/favicon.ico`), and the in-memory admin user (BCrypt hash from env). |
+| `config.SecurityConfig` | Form login, public paths (`/assets/**`, `/lib/**`, `/login`, `/error`, `/favicon.ico`), the in-memory admin user (BCrypt hash from env), and the TOTP authentication provider. |
 
 ### 2.2 Controllers (thin HTTP layer)
 | Class | Type | Routes | Delegates to |
@@ -156,6 +157,9 @@ walks `*.md`, matches title/content → flat 1-depth result list in the sidebar.
 - **Uploads**: images only (png/jpg/gif/webp), 10 MB limit; SVG is rejected to avoid script injection. Served with a long immutable cache header.
 - **CSRF**: enabled; the frontend reads the token from meta tags for all mutating requests.
 - **Auth**: all non-static routes require the `ADMIN` role.
+- **TOTP (2FA)**: when `app.admin.totp-secret` (Base32) is set, login also requires a
+  valid RFC 6238 code (`security.TotpAuthenticationProvider` + `TotpValidator`, +-1 step
+  drift). When the secret is blank the TOTP step is skipped (convenient for local dev).
 
 ---
 
@@ -170,4 +174,4 @@ walks `*.md`, matches title/content → flat 1-depth result list in the sidebar.
 
 **Required configuration** (`application.properties` / env):
 `app.content.dir` (vault path), `app.admin.username`, `app.admin.password-hash`
-(BCrypt). Profiles: `local` (no caching, live reload) and `prod` (Thymeleaf cache on).
+(BCrypt), and the optional `app.admin.totp-secret` (Base32; blank disables 2FA). Profiles: `local` (no caching, live reload) and `prod` (Thymeleaf cache on).
