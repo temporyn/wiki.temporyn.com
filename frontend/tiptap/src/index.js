@@ -13,6 +13,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { Markdown } from 'tiptap-markdown';
 import { SlashCommand } from './slash-command.js';
+import { buildTableMenu } from './table-menu.js';
 
 import 'tippy.js/dist/tippy.css';
 import './bundle.css';
@@ -86,6 +87,7 @@ export function createNotionEditor(options) {
 
   let editorRef = null;
   const bubble = buildBubbleMenu(() => editorRef);
+  const tableMenu = buildTableMenu(() => editorRef);
 
   const editor = new Editor({
     element,
@@ -106,7 +108,7 @@ export function createNotionEditor(options) {
       Image.configure({ inline: false, allowBase64: true }),
       TaskList,
       TaskItem.configure({ nested: true }),
-      Table.configure({ resizable: true }),
+      Table.configure({ resizable: true, allowTableNodeSelection: true }),
       TableRow,
       TableHeader,
       TableCell,
@@ -118,8 +120,17 @@ export function createNotionEditor(options) {
         breaks: true,
       }),
       BubbleMenu.configure({
+        pluginKey: 'textBubbleMenu',
         element: bubble.element,
+        shouldShow: ({ editor: current, from, to }) =>
+          from !== to && !current.isActive('table') && !current.isActive('image'),
         tippyOptions: { duration: 120 },
+      }),
+      BubbleMenu.configure({
+        pluginKey: 'tableBubbleMenu',
+        element: tableMenu.element,
+        shouldShow: ({ editor: current }) => current.isActive('table'),
+        tippyOptions: { duration: 120, placement: 'top', maxWidth: 'none' },
       }),
       SlashCommand,
     ],
