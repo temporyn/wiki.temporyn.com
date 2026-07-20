@@ -118,6 +118,15 @@ class SlashMenuView {
       });
       this.root.appendChild(button);
     });
+    this.scrollActiveIntoView();
+  }
+
+  // Keep the highlighted item visible when navigating with the keyboard.
+  scrollActiveIntoView() {
+    const active = this.root.querySelector('.tiptap-slash-item.is-active');
+    if (active) {
+      active.scrollIntoView({ block: 'nearest' });
+    }
   }
 
   updateItems(items) {
