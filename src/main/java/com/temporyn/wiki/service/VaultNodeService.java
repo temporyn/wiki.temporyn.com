@@ -47,6 +47,18 @@ public class VaultNodeService {
         return paths.stripMarkdownSuffix(paths.toRelative(target));
     }
 
+    /** Store an uploaded file under a folder, keeping its original name. Returns the vault-relative path. */
+    public String uploadFile(String parentPath, String fileName, byte[] data) {
+        String safeName = paths.validateName(fileName);
+        Path target = paths.resolveNewChild(parentPath, safeName);
+        try {
+            Files.write(target, data);
+        } catch (IOException e) {
+            throw serverError("Cannot upload file: " + e.getMessage());
+        }
+        return paths.toRelative(target);
+    }
+
     public String renameDirectory(String relativePath, String newName) {
         Path source = paths.resolveDirectory(relativePath);
         return paths.toRelative(renameTo(source, paths.validateName(newName)));

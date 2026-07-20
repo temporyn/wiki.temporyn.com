@@ -1,16 +1,23 @@
 package com.temporyn.wiki.controller;
 
 import com.temporyn.wiki.service.VaultNodeService;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 /** REST API for structural vault operations triggered from the sidebar. */
 @RestController
 @RequestMapping("/api")
 public class VaultNodeController {
+
+    private static final long MAX_UPLOAD_BYTES = 50L * 1024 * 1024;
 
     private final VaultNodeService nodeService;
 
@@ -26,6 +33,26 @@ public class VaultNodeController {
     @PostMapping("/articles")
     public Map<String, String> createArticle(@RequestBody CreateRequest request) {
         return viewResponse(nodeService.createArticle(request.parentPath(), request.name()));
+    }
+
+    @PostMapping("/files")
+    public Map<String, String> uploadFile(
+            @RequestParam(value = "parentPath", required = false) String parentPath,
+            @RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file provided.");
+        }
+        if (file.getSize() > MAX_UPLOAD_BYTES) {
+            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "File must be 50MB or smaller.");
+        }
+        byte[] data;
+        try {
+            data = file.getBytes();
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot read the uploaded file.");
+        }
+        String name = file.getOriginalFilename();
+        return Map.of("path", nodeService.uploadFile(parentPath, name, data));
     }
 
     @PostMapping("/directories/rename")

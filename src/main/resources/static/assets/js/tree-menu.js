@@ -323,6 +323,38 @@
   /* ── Drag & drop move ──────────────────────────────────────────────── */
   var dragged = null;
 
+  /* Upload OS files (dropped onto the sidebar) sequentially into targetPath. */
+  function uploadFiles(fileList, targetPath) {
+    var files = Array.prototype.slice.call(fileList);
+    var uploaded = 0;
+
+    function next(index) {
+      if (index >= files.length) {
+        if (uploaded > 0) reload();
+        return;
+      }
+      var headers = {};
+      headers[csrfHeader] = csrfToken;
+      var data = new FormData();
+      data.append('file', files[index]);
+      if (targetPath) data.append('parentPath', targetPath);
+
+      fetch('/api/files', { method: 'POST', headers: headers, body: data })
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().catch(function () { return {}; }).then(function (j) {
+              throw new Error(j.message || j.error || ('Upload failed (' + res.status + ')'));
+            });
+          }
+          uploaded++;
+        })
+        .catch(fail)
+        .then(function () { next(index + 1); });
+    }
+
+    next(0);
+  }
+
   function clearDropTargets() {
     nav.querySelectorAll('.drop-target').forEach(function (el) { el.classList.remove('drop-target'); });
   }
@@ -342,20 +374,32 @@
   });
 
   scroll.addEventListener('dragover', function (e) {
-    if (!dragged) return;
+    var isFileDrag = !dragged && e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0;
+    if (!dragged && !isFileDrag) return;
     e.preventDefault();
+    if (isFileDrag) e.dataTransfer.dropEffect = 'copy';
     clearDropTargets();
     var dir = e.target.closest('.tree-dir');
     if (dir) dir.classList.add('drop-target');
   });
 
   scroll.addEventListener('drop', function (e) {
-    if (!dragged) return;
+    var files = e.dataTransfer && e.dataTransfer.files;
+    var isFileDrop = !dragged && files && files.length > 0;
+
+    if (!dragged && !isFileDrop) return;
     e.preventDefault();
     clearDropTargets();
 
     var dir = e.target.closest('.tree-dir');
     var targetPath = dir ? dir.dataset.path : '';
+
+    // OS file drop: upload into the folder, or to the vault root on empty space.
+    if (isFileDrop) {
+      uploadFiles(files, targetPath);
+      return;
+    }
+
     var moving = dragged;
     dragged = null;
 
