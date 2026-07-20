@@ -13,15 +13,18 @@ import org.springframework.stereotype.Component;
 public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final AuthEventLogger authEventLogger;
+    private final LoginAttemptService attempts;
 
-    public AuthSuccessHandler(AuthEventLogger authEventLogger) {
+    public AuthSuccessHandler(AuthEventLogger authEventLogger, LoginAttemptService attempts) {
         this.authEventLogger = authEventLogger;
+        this.attempts = attempts;
         setDefaultTargetUrl("/");
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
+        attempts.recordSuccess(request.getRemoteAddr(), authentication.getName());
         authEventLogger.logSuccess(request, authentication.getName(), "Password + TOTP");
         super.onAuthenticationSuccess(request, response, authentication);
     }

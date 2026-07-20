@@ -30,15 +30,27 @@ public class AuthEventLogger {
     private static final String DEVICE_COOKIE = "device_id";
 
     public void logSuccess(HttpServletRequest request, String account, String method) {
-        log(request, account, "SUCCESS", "-", method, null);
+        log(request, account, "SUCCESS", "-", method, null, "-", "-");
     }
 
     public void logFailure(HttpServletRequest request, String account, String failureStage, String reason) {
-        log(request, account, "FAILURE", failureStage, "-", reason);
+        log(request, account, "FAILURE", failureStage, "-", reason, "-", "-");
+    }
+
+    /** Record a failed login together with any rate-limit and auto-block outcome. */
+    public void logFailure(HttpServletRequest request, String account, String failureStage, String reason,
+            String rateLimit, String autoBlock) {
+        log(request, account, "FAILURE", failureStage, "-", reason, rateLimit, autoBlock);
+    }
+
+    /** Record a request rejected up front by the rate limiter (before credential checks). */
+    public void logRateLimited(HttpServletRequest request, String account, String reason, long blockedUntilEpochMs) {
+        String autoBlock = blockedUntilEpochMs > 0 ? "until " + KST_FMT.format(Instant.ofEpochMilli(blockedUntilEpochMs)) : "-";
+        log(request, account, "BLOCKED", "RATE_LIMIT", "-", reason, reason, autoBlock);
     }
 
     private void log(HttpServletRequest request, String account, String result,
-            String failureStage, String method, String reason) {
+            String failureStage, String method, String reason, String rateLimit, String autoBlock) {
         Instant now = Instant.now();
         StringBuilder sb = new StringBuilder();
         append(sb, "eventId", UUID.randomUUID().toString());
@@ -56,11 +68,11 @@ public class AuthEventLogger {
         append(sb, "userAgent", request != null ? request.getHeader("User-Agent") : "-");
         append(sb, "path", request != null ? request.getRequestURI() : "-");
         append(sb, "deviceIdHash", deviceIdHash(request));
-        // The following require state/services not yet implemented; kept for a stable schema.
+        // These require services not yet implemented; kept for a stable schema.
         append(sb, "newIp", "n/a");
         append(sb, "newDevice", "n/a");
-        append(sb, "rateLimit", "n/a");
-        append(sb, "autoBlock", "n/a");
+        append(sb, "rateLimit", rateLimit);
+        append(sb, "autoBlock", autoBlock);
         append(sb, "mailStatus", "SMTP_NOT_CONFIGURED");
         LOG.info(sb.toString().trim());
     }

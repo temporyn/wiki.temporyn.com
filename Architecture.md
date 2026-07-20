@@ -45,11 +45,13 @@ Package root: `com.temporyn.wiki`
 | Class | Responsibility |
 |-------|----------------|
 | `TotpValidator` | RFC 6238 TOTP verification (HMAC-SHA1, 6 digits, 30s step, +-1 drift), Base32 secret, no external deps. |
-| `TotpAuthenticationProvider` | Extends `DaoAuthenticationProvider`; after the password check, requires a valid TOTP code when `app.admin.totp-secret` is set (skipped when blank). |
+| `TotpAuthenticationProvider` | Extends `DaoAuthenticationProvider`; after the password check, requires a valid TOTP code when `app.admin.totp-secret` is set (skipped when blank). Rejects once the post-password TOTP transaction is exhausted (5 attempts / 5-min expiry, tracked in `LoginAttemptService`). |
+| `LoginAttemptService` | In-memory brute-force protection: per-IP request quota (5/min), per-IP failure block (20/15min -> 30min), per-account block (10/1h -> 15min) with progressive delay (2/4/8s from 5/15min), per-IP+account block (5/10min -> 15min), and the TOTP transaction counter. |
+| `LoginRateLimitFilter` | Runs before the login filter: blocks/over-quota requests are logged and redirected to `/login?error`; otherwise applies the progressive delay. |
 | `TotpAuthenticationException` | Internal marker for a TOTP-stage failure so the log can record the stage while the user response stays generic. |
 | `TotpWebAuthenticationDetails` | Captures the login form `code` parameter into the authentication details. |
 | `AuthEventLogger` | Writes structured auth events to the dedicated `AUTH_EVENT` logger (per-day rolling file). Never logs passwords, TOTP codes/secret, cookies, or tokens. |
-| `AuthSuccessHandler` / `AuthFailureHandler` | Log the success/failure event (with failing stage) around the redirect; failures always redirect to a generic `/login?error`. |
+| `AuthSuccessHandler` / `AuthFailureHandler` | Log the success/failure event (with failing stage) around the redirect and update `LoginAttemptService` counters; failures always redirect to a generic `/login?error`. |
 
 ### 2.2 Controllers (thin HTTP layer)
 | Class | Type | Routes | Delegates to |
@@ -178,6 +180,14 @@ walks `*.md`, matches title/content → flat 1-depth result list in the sidebar.
   fields pending later work (new IP/device, rate limit, auto-block, mail status).
   Secrets (password, TOTP code/secret, cookies, tokens) are never logged. Override
   the directory with `LOG_DIR`. IPv4-mapped IPv6 addresses are normalized to IPv4.
+- **Rate limiting / brute-force** (`LoginAttemptService` + `LoginRateLimitFilter`,
+  in-memory, single instance): per-IP request quota (5/min), per-IP failure block
+  (20 in 15min -> 30min), per-account block (10 in 1h -> 15min) with progressive
+  delay (2/4/8s from 5 in 15min), and per-IP+account block (5 in 10min -> 15min).
+  Blocked requests are logged with `result="BLOCKED"` and the block expiry.
+- **TOTP transaction**: after the password passes, the TOTP step allows at most 5
+  attempts and expires 5 minutes after the last attempt (tracked per IP+account);
+  a successful login clears it.
 - **Reverse proxy / TLS**: TLS is terminated by Nginx; the `prod` profile sets
   `server.forward-headers-strategy=framework` so the app sees the real client IP
   (via `X-Forwarded-For`) and treats requests as HTTPS (via `X-Forwarded-Proto`).

@@ -16,10 +16,12 @@ import org.springframework.stereotype.Component;
 public class AuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private final AuthEventLogger authEventLogger;
+    private final LoginAttemptService attempts;
 
-    public AuthFailureHandler(AuthEventLogger authEventLogger) {
+    public AuthFailureHandler(AuthEventLogger authEventLogger, LoginAttemptService attempts) {
         super("/login?error");
         this.authEventLogger = authEventLogger;
+        this.attempts = attempts;
     }
 
     @Override
@@ -27,7 +29,8 @@ public class AuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
             AuthenticationException exception) throws IOException, ServletException {
         String account = request.getParameter("username");
         String stage = (exception instanceof TotpAuthenticationException) ? "TOTP" : "PASSWORD";
-        authEventLogger.logFailure(request, account, stage, exception.getClass().getSimpleName());
+        String autoBlock = attempts.recordFailure(request.getRemoteAddr(), account);
+        authEventLogger.logFailure(request, account, stage, exception.getClass().getSimpleName(), "-", autoBlock);
         super.onAuthenticationFailure(request, response, exception);
     }
 }

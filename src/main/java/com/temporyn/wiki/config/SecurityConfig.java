@@ -2,6 +2,7 @@ package com.temporyn.wiki.config;
 
 import com.temporyn.wiki.security.AuthFailureHandler;
 import com.temporyn.wiki.security.AuthSuccessHandler;
+import com.temporyn.wiki.security.LoginRateLimitFilter;
 import com.temporyn.wiki.security.TotpAuthenticationProvider;
 import com.temporyn.wiki.security.TotpWebAuthenticationDetails;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
 @Configuration
@@ -29,9 +31,11 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, TotpAuthenticationProvider totpProvider,
-            AuthSuccessHandler successHandler, AuthFailureHandler failureHandler) throws Exception {
+            AuthSuccessHandler successHandler, AuthFailureHandler failureHandler,
+            LoginRateLimitFilter rateLimitFilter) throws Exception {
         http
                 .authenticationProvider(totpProvider)
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
                         .anyRequest().hasRole("ADMIN"))
