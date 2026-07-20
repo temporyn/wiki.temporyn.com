@@ -113,7 +113,7 @@ The editor is built locally (no CDN) and committed under
 `static/lib/tiptap/{version}/`.
 
 - **Source**: `frontend/tiptap/` (esbuild → single IIFE bundle).
-  - `src/index.js` — `createNotionEditor({element, content, editable, uploadImage})`, exposed as `window.TemporynTiptap`. Configures StarterKit, tables, task lists, links, images, Markdown import/export, placeholder, bubble menu, and slash command (edit mode only).
+  - `src/index.js` — `createNotionEditor({element, content, editable, uploadImage})`, exposed as `window.TemporynTiptap`. Configures StarterKit, tables, task lists, links, images, Markdown import/export, code-block syntax highlighting (lowlight/highlight.js, common languages), placeholder, bubble menu, and slash command (edit mode only).
   - `src/slash-command.js` — `/` block menu (headings, lists, checklist, quote, code, table, image upload, …).
   - `src/table-menu.js` — in-table floating toolbar (add/remove row & column, header, merge, delete table).
   - `src/bundle.css` — structural popup styling.

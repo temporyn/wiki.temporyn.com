@@ -54,6 +54,35 @@
 }
 .tiptap-content pre code { background: none; padding: 0; }
 
+/* Syntax highlighting (lowlight/highlight.js) mapped to theme tokens. */
+.tiptap-content pre code .hljs-comment,
+.tiptap-content pre code .hljs-quote { color: var(--syn-comment); font-style: italic; }
+.tiptap-content pre code .hljs-keyword,
+.tiptap-content pre code .hljs-selector-tag,
+.tiptap-content pre code .hljs-literal,
+.tiptap-content pre code .hljs-section { color: var(--syn-keyword); }
+.tiptap-content pre code .hljs-string,
+.tiptap-content pre code .hljs-regexp,
+.tiptap-content pre code .hljs-meta .hljs-string { color: var(--syn-string); }
+.tiptap-content pre code .hljs-number,
+.tiptap-content pre code .hljs-bullet { color: var(--syn-number); }
+.tiptap-content pre code .hljs-name,
+.tiptap-content pre code .hljs-tag { color: var(--syn-tag); }
+.tiptap-content pre code .hljs-attr,
+.tiptap-content pre code .hljs-attribute,
+.tiptap-content pre code .hljs-symbol { color: var(--syn-attr); }
+.tiptap-content pre code .hljs-title,
+.tiptap-content pre code .hljs-title.function_,
+.tiptap-content pre code .hljs-function .hljs-title { color: var(--syn-func); }
+.tiptap-content pre code .hljs-built_in,
+.tiptap-content pre code .hljs-class .hljs-title { color: var(--syn-builtin); }
+.tiptap-content pre code .hljs-variable,
+.tiptap-content pre code .hljs-template-variable,
+.tiptap-content pre code .hljs-type { color: var(--syn-const); }
+.tiptap-content pre code .hljs-meta { color: var(--syn-comment); }
+.tiptap-content pre code .hljs-emphasis { font-style: italic; }
+.tiptap-content pre code .hljs-strong { font-weight: 700; }
+
 /* Tight list spacing */
 .tiptap-content ul, .tiptap-content ol { margin: .4rem 0; }
 .tiptap-content li { margin: .1rem 0; }

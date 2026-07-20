@@ -10,6 +10,7 @@
   "dependencies": {
     "@tiptap/core": "^2.11.5",
     "@tiptap/extension-bubble-menu": "^2.11.5",
+    "@tiptap/extension-code-block-lowlight": "^2.27.2",
     "@tiptap/extension-image": "^2.11.5",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/extension-placeholder": "^2.11.5",
@@ -22,6 +23,8 @@
     "@tiptap/pm": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
     "@tiptap/suggestion": "^2.11.5",
+    "highlight.js": "^11.11.1",
+    "lowlight": "^3.3.0",
     "tippy.js": "^6.3.7",
     "tiptap-extension-global-drag-handle": "^0.1.16",
     "tiptap-markdown": "^0.8.10"

@@ -13,8 +13,34 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { Markdown } from 'tiptap-markdown';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { createLowlight } from 'lowlight';
+import bash from 'highlight.js/lib/languages/bash';
+import c from 'highlight.js/lib/languages/c';
+import cpp from 'highlight.js/lib/languages/cpp';
+import csharp from 'highlight.js/lib/languages/csharp';
+import css from 'highlight.js/lib/languages/css';
+import go from 'highlight.js/lib/languages/go';
+import java from 'highlight.js/lib/languages/java';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import kotlin from 'highlight.js/lib/languages/kotlin';
+import markdown from 'highlight.js/lib/languages/markdown';
+import python from 'highlight.js/lib/languages/python';
+import rust from 'highlight.js/lib/languages/rust';
+import sql from 'highlight.js/lib/languages/sql';
+import typescript from 'highlight.js/lib/languages/typescript';
+import xml from 'highlight.js/lib/languages/xml';
+import yaml from 'highlight.js/lib/languages/yaml';
 import { SlashCommand } from './slash-command.js';
 import { buildTableMenu } from './table-menu.js';
+
+// Register a focused set of common languages to keep the bundle small.
+const lowlight = createLowlight();
+lowlight.register({
+  bash, c, cpp, csharp, css, go, java, javascript, json, kotlin,
+  markdown, python, rust, sql, typescript, xml, yaml,
+});
 
 import 'tippy.js/dist/tippy.css';
 import './bundle.css';
@@ -99,7 +125,11 @@ export function createNotionEditor(options) {
 
   const extensions = [
     StarterKit.configure({
-      codeBlock: { HTMLAttributes: { class: 'tiptap-code-block' } },
+      codeBlock: false,
+    }),
+    CodeBlockLowlight.configure({
+      lowlight,
+      HTMLAttributes: { class: 'tiptap-code-block' },
     }),
     ImageUpload,
     Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener noreferrer' } }),
