@@ -39,7 +39,17 @@ Package root: `com.temporyn.wiki`
 | Class | Responsibility |
 |-------|----------------|
 | `WikiApplication` | Spring Boot entry point. |
-| `config.SecurityConfig` | Form login, public paths (`/assets/**`, `/lib/**`, `/login`, `/error`, `/favicon.ico`), the in-memory admin user (BCrypt hash from env), and the TOTP authentication provider. |
+| `config.SecurityConfig` | Form login, public paths (`/assets/**`, `/lib/**`, `/login`, `/error`, `/favicon.ico`), the in-memory admin user (BCrypt hash from env), the TOTP authentication provider, and the auth success/failure handlers. |
+
+### 2.1.1 Security package (`security`)
+| Class | Responsibility |
+|-------|----------------|
+| `TotpValidator` | RFC 6238 TOTP verification (HMAC-SHA1, 6 digits, 30s step, +-1 drift), Base32 secret, no external deps. |
+| `TotpAuthenticationProvider` | Extends `DaoAuthenticationProvider`; after the password check, requires a valid TOTP code when `app.admin.totp-secret` is set (skipped when blank). |
+| `TotpAuthenticationException` | Internal marker for a TOTP-stage failure so the log can record the stage while the user response stays generic. |
+| `TotpWebAuthenticationDetails` | Captures the login form `code` parameter into the authentication details. |
+| `AuthEventLogger` | Writes structured auth events to the dedicated `AUTH_EVENT` logger (per-day rolling file). Never logs passwords, TOTP codes/secret, cookies, or tokens. |
+| `AuthSuccessHandler` / `AuthFailureHandler` | Log the success/failure event (with failing stage) around the redirect; failures always redirect to a generic `/login?error`. |
 
 ### 2.2 Controllers (thin HTTP layer)
 | Class | Type | Routes | Delegates to |
@@ -160,6 +170,14 @@ walks `*.md`, matches title/content → flat 1-depth result list in the sidebar.
 - **TOTP (2FA)**: when `app.admin.totp-secret` (Base32) is set, login also requires a
   valid RFC 6238 code (`security.TotpAuthenticationProvider` + `TotpValidator`, +-1 step
   drift). When the secret is blank the TOTP step is skipped (convenient for local dev).
+- **Auth logging**: every login success/failure is written to a dedicated, per-day
+  rolling file (`logs/auth/auth-YYYY-MM-DD.log`) via the `AUTH_EVENT` logger
+  (`logback-spring.xml`), separate from the app log. Each event is a single
+  `key="value"` line: event id, UTC + KST time, account, result, failure stage,
+  source/forwarded IP, user agent, path, device-cookie hash, and placeholders for
+  fields pending later work (new IP/device, rate limit, auto-block, mail status).
+  Secrets (password, TOTP code/secret, cookies, tokens) are never logged. Override
+  the directory with `LOG_DIR`.
 
 ---
 

@@ -1,7 +1,6 @@
 package com.temporyn.wiki.security;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -41,7 +40,7 @@ public class TotpAuthenticationProvider extends DaoAuthenticationProvider {
                 code = details.getCode();
             }
             if (!totpValidator.verify(totpSecret, code)) {
-                throw new BadCredentialsException("Invalid authentication code.");
+                throw new TotpAuthenticationException("Invalid authentication code.");
             }
         }
         return result;

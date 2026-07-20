@@ -43,3 +43,6 @@ out/
 ### Frontend build ###
 /frontend/tiptap/node_modules/
 /frontend/tiptap/package-lock.json
+
+### Logs ###
+/logs/

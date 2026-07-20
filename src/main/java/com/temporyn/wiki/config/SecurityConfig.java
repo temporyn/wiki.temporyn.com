@@ -1,5 +1,7 @@
 package com.temporyn.wiki.config;
 
+import com.temporyn.wiki.security.AuthFailureHandler;
+import com.temporyn.wiki.security.AuthSuccessHandler;
 import com.temporyn.wiki.security.TotpAuthenticationProvider;
 import com.temporyn.wiki.security.TotpWebAuthenticationDetails;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +27,8 @@ public class SecurityConfig {
     };
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, TotpAuthenticationProvider totpProvider)
-            throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, TotpAuthenticationProvider totpProvider,
+            AuthSuccessHandler successHandler, AuthFailureHandler failureHandler) throws Exception {
         http
                 .authenticationProvider(totpProvider)
                 .authorizeHttpRequests(auth -> auth
@@ -35,7 +37,8 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .authenticationDetailsSource(new TotpWebAuthenticationDetails.Source())
-                        .defaultSuccessUrl("/", false)
+                        .successHandler(successHandler)
+                        .failureHandler(failureHandler)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login")
