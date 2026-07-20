@@ -296,6 +296,24 @@
   document.addEventListener('scroll', hideMenu, true);
   window.addEventListener('resize', hideMenu);
 
+  /* ── 고아 이미지 정리 ──────────────────────────────────────────────── */
+  var cleanupBtn = document.getElementById('media-cleanup');
+  if (cleanupBtn) {
+    cleanupBtn.addEventListener('click', function () {
+      confirmModal('미참조 이미지 정리', '어떤 문서에서도 참조하지 않는 이미지를 삭제합니다. 진행할까요?', { confirmLabel: '정리' })
+        .then(function (ok) {
+          if (!ok) return;
+          cleanupBtn.classList.add('is-busy');
+          post('/api/media/cleanup', {})
+            .then(function (j) {
+              alertModal('정리 완료', (j.deleted || 0) + '개의 미참조 이미지를 삭제했습니다.');
+            })
+            .catch(fail)
+            .then(function () { cleanupBtn.classList.remove('is-busy'); });
+        });
+    });
+  }
+
   /* ── 드래그 & 드롭 이동 ────────────────────────────────────────────── */
   var dragged = null;
 

@@ -10,8 +10,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +35,7 @@ public class VaultService {
     private static final Logger log = LoggerFactory.getLogger(VaultService.class);
     private static final String MARKDOWN_SUFFIX = ".md";
     private static final String MEDIA_DIR = ".assets";
+    private static final Pattern MEDIA_REFERENCE = Pattern.compile("/media/([^)\\s\"'>]+)");
 
     private final Path root;
 
@@ -147,6 +152,63 @@ public class VaultService {
             });
         } catch (IOException | UncheckedIOException e) {
             throw failed("폴더를 삭제할 수 없습니다: " + e.getMessage());
+        }
+    }
+
+    /** Remove media files under ".assets" that no document references. Returns the number of files deleted. */
+    public int cleanupOrphanMedia() {
+        Path mediaDir = root.resolve(MEDIA_DIR).normalize();
+        if (!Files.isDirectory(mediaDir)) {
+            return 0;
+        }
+        Set<String> referenced = collectReferencedMedia();
+        List<Path> mediaFiles;
+        try (Stream<Path> stream = Files.walk(mediaDir)) {
+            mediaFiles = stream.filter(Files::isRegularFile).toList();
+        } catch (IOException e) {
+            throw failed("이미지 폴더를 읽을 수 없습니다: " + e.getMessage());
+        }
+        int deleted = 0;
+        for (Path file : mediaFiles) {
+            if (!referenced.contains(file.getFileName().toString())) {
+                try {
+                    Files.delete(file);
+                    deleted++;
+                } catch (IOException e) {
+                    log.warn("고아 이미지를 삭제할 수 없습니다: {}", file, e);
+                }
+            }
+        }
+        return deleted;
+    }
+
+    /** Collect media file names referenced by any markdown document in the vault. */
+    private Set<String> collectReferencedMedia() {
+        Set<String> names = new HashSet<>();
+        try (Stream<Path> stream = Files.walk(root)) {
+            stream.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(MARKDOWN_SUFFIX))
+                    .forEach(path -> collectMediaNames(path, names));
+        } catch (IOException e) {
+            throw failed("문서를 읽을 수 없습니다: " + e.getMessage());
+        }
+        return names;
+    }
+
+    private void collectMediaNames(Path markdownFile, Set<String> names) {
+        String content;
+        try {
+            content = Files.readString(markdownFile, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            log.warn("문서를 읽을 수 없습니다: {}", markdownFile, e);
+            return;
+        }
+        Matcher matcher = MEDIA_REFERENCE.matcher(content);
+        while (matcher.find()) {
+            String encoded = matcher.group(1);
+            String decoded = UriUtils.decode(encoded, StandardCharsets.UTF_8);
+            int slash = decoded.lastIndexOf('/');
+            names.add(slash < 0 ? decoded : decoded.substring(slash + 1));
         }
     }
 

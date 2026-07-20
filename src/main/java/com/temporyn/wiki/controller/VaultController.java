@@ -60,6 +60,11 @@ public class VaultController {
         return Map.of("path", request.path());
     }
 
+    @PostMapping("/media/cleanup")
+    public Map<String, Integer> cleanupMedia() {
+        return Map.of("deleted", vaultService.cleanupOrphanMedia());
+    }
+
     private Map<String, String> viewResponse(String path) {
         return Map.of("path", path, "url", "/view/" + path);
     }
