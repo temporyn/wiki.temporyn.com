@@ -51,7 +51,7 @@ public class AuthEventLogger {
             append(sb, "reason", reason);
         }
         append(sb, "authMethod", method);
-        append(sb, "sourceIp", request != null ? request.getRemoteAddr() : "-");
+        append(sb, "sourceIp", normalizeIp(request != null ? request.getRemoteAddr() : "-"));
         append(sb, "clientIp", clientIp(request));
         append(sb, "userAgent", request != null ? request.getHeader("User-Agent") : "-");
         append(sb, "path", request != null ? request.getRequestURI() : "-");
@@ -75,7 +75,23 @@ public class AuthEventLogger {
             return "-";
         }
         int comma = forwarded.indexOf(',');
-        return (comma < 0 ? forwarded : forwarded.substring(0, comma)).trim();
+        return normalizeIp((comma < 0 ? forwarded : forwarded.substring(0, comma)).trim());
+    }
+
+    /** Collapse an IPv4-mapped IPv6 address (::ffff:203.0.113.25) to plain IPv4. */
+    private String normalizeIp(String ip) {
+        if (ip == null || ip.isBlank()) {
+            return "-";
+        }
+        String value = ip.trim();
+        int prefix = value.lastIndexOf(':');
+        if (prefix >= 0 && value.regionMatches(true, 0, "::ffff:", 0, 7)) {
+            String tail = value.substring(prefix + 1);
+            if (tail.matches("\\d{1,3}(\\.\\d{1,3}){3}")) {
+                return tail;
+            }
+        }
+        return value;
     }
 
     /** SHA-256 hash of the known-device cookie value, or "-" when absent. */
