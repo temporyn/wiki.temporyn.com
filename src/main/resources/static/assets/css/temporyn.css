@@ -265,7 +265,7 @@ th { background: var(--bg-2); }
 
 /* ── Sidebar context menu ──────────────────────────────────────────────── */
 .context-menu {
-  position: absolute; z-index: 100; min-width: 150px; margin: 0; padding: .3rem;
+  position: fixed; z-index: 100; min-width: 150px; margin: 0; padding: .3rem;
   list-style: none; background: var(--bg-1); border: 1px solid var(--code-border);
   border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); font-size: 13px;
 }

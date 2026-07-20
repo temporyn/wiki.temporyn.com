@@ -111,9 +111,24 @@
       li.addEventListener('click', function () { hideMenu(); item.action(); });
       menu.appendChild(li);
     });
-    menu.style.left = x + 'px';
-    menu.style.top = y + 'px';
+
+    // Show first to measure, then keep the menu inside the viewport.
+    menu.style.left = '0';
+    menu.style.top = '0';
     menu.hidden = false;
+
+    var margin = 8;
+    var rect = menu.getBoundingClientRect();
+    var left = x;
+    var top = y;
+    if (left + rect.width > window.innerWidth - margin) {
+      left = Math.max(margin, x - rect.width);
+    }
+    if (top + rect.height > window.innerHeight - margin) {
+      top = Math.max(margin, y - rect.height);
+    }
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
   }
 
   scroll.addEventListener('contextmenu', function (e) {
@@ -150,7 +165,7 @@
       ];
     }
 
-    showMenu(e.pageX, e.pageY, items);
+    showMenu(e.clientX, e.clientY, items);
   });
 
   document.addEventListener('click', hideMenu);
