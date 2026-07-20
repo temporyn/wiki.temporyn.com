@@ -3,6 +3,27 @@
 
   if (!window.TemporynTiptap) return;
 
+  function uploadImage(file) {
+    var headers = {};
+    var tokenMeta = document.querySelector('meta[name="_csrf"]');
+    var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+    if (tokenMeta && headerMeta) {
+      headers[headerMeta.getAttribute('content')] = tokenMeta.getAttribute('content');
+    }
+    var data = new FormData();
+    data.append('file', file);
+    return fetch('/api/images', { method: 'POST', headers: headers, body: data })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('upload failed');
+        }
+        return response.json();
+      })
+      .then(function (json) {
+        return json.url;
+      });
+  }
+
   var editMount = document.getElementById('tiptap-editor');
   if (editMount) {
     var hidden = document.getElementById('content');
@@ -12,6 +33,7 @@
       content: hidden.value,
       placeholder: '내용을 입력하세요…',
       editable: true,
+      uploadImage: uploadImage,
     });
     var form = editMount.closest('form');
     if (form) {

@@ -1,4 +1,5 @@
 import { Editor } from '@tiptap/core';
+import { Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import BubbleMenu from '@tiptap/extension-bubble-menu';
@@ -17,6 +18,14 @@ import { buildTableMenu } from './table-menu.js';
 
 import 'tippy.js/dist/tippy.css';
 import './bundle.css';
+
+// Holds the async image upload handler so the slash command can reach it.
+const ImageUpload = Extension.create({
+  name: 'imageUpload',
+  addStorage() {
+    return { handler: null };
+  },
+});
 
 const BUBBLE_BUTTONS = [
   { label: 'B', title: '굵게', className: 'tt-b-bold', isActive: 'bold', run: (c) => c.toggleBold() },
@@ -83,7 +92,7 @@ function buildBubbleMenu(getEditor) {
 }
 
 export function createNotionEditor(options) {
-  const { element, content = '', placeholder = '내용을 입력하세요…', editable = true, onUpdate } = options;
+  const { element, content = '', placeholder = '내용을 입력하세요…', editable = true, onUpdate, uploadImage } = options;
 
   let editorRef = null;
   let bubble = null;
@@ -92,6 +101,7 @@ export function createNotionEditor(options) {
     StarterKit.configure({
       codeBlock: { HTMLAttributes: { class: 'tiptap-code-block' } },
     }),
+    ImageUpload,
     Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener noreferrer' } }),
     Image.configure({ inline: false, allowBase64: true }),
     TaskList,
@@ -160,6 +170,10 @@ export function createNotionEditor(options) {
   });
 
   editorRef = editor;
+
+  if (typeof uploadImage === 'function') {
+    editor.storage.imageUpload.handler = uploadImage;
+  }
 
   return {
     editor,

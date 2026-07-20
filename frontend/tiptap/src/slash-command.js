@@ -63,12 +63,25 @@ const items = [
     title: '이미지',
     keywords: ['image', 'picture', '이미지', '그림'],
     command: ({ editor, range }) => {
-      const url = window.prompt('이미지 URL을 입력하세요');
-      if (url) {
-        editor.chain().focus().deleteRange(range).setImage({ src: url }).run();
-      } else {
-        editor.chain().focus().deleteRange(range).run();
-      }
+      editor.chain().focus().deleteRange(range).run();
+      const upload = editor.storage.imageUpload && editor.storage.imageUpload.handler;
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/png,image/jpeg,image/gif,image/webp';
+      input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        Promise.resolve(upload ? upload(file) : null)
+          .then((url) => {
+            if (url) {
+              editor.chain().focus().setImage({ src: url }).run();
+            }
+          })
+          .catch(() => {
+            window.alert('이미지 업로드에 실패했습니다.');
+          });
+      });
+      input.click();
     },
   },
 ];

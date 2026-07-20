@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class VaultService {
 
     private static final Logger log = LoggerFactory.getLogger(VaultService.class);
     private static final String MARKDOWN_SUFFIX = ".md";
+    private static final String MEDIA_DIR = ".assets";
 
     private final Path root;
 
@@ -87,6 +89,39 @@ public class VaultService {
         } catch (IOException e) {
             throw failed("문서를 저장할 수 없습니다: " + e.getMessage());
         }
+    }
+
+    /** Store an uploaded image under the hidden ".assets" folder. Returns the vault-relative path. */
+    public String saveMedia(byte[] data, String extension) {
+        ensureRoot();
+        Path dir = root.resolve(MEDIA_DIR).normalize();
+        try {
+            Files.createDirectories(dir);
+        } catch (IOException e) {
+            throw failed("이미지 폴더를 만들 수 없습니다: " + e.getMessage());
+        }
+        Path target = dir.resolve(UUID.randomUUID() + extension).normalize();
+        if (!target.startsWith(root)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 경로입니다.");
+        }
+        try {
+            Files.write(target, data);
+        } catch (IOException e) {
+            throw failed("이미지를 저장할 수 없습니다: " + e.getMessage());
+        }
+        return relativeOf(target);
+    }
+
+    /** Resolve a vault-relative media path for serving. */
+    public Path resolveMedia(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
+        }
+        Path file = root.resolve(relativePath).normalize();
+        if (!file.startsWith(root) || !Files.isRegularFile(file)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
+        }
+        return file;
     }
 
     /** 폴더 이름 변경. 반환값은 새 상대 경로. */
