@@ -124,6 +124,32 @@ public class VaultService {
         return file;
     }
 
+    /** Delete a document (*.md). */
+    public void deleteArticle(String relativePath) {
+        Path file = resolveArticle(relativePath);
+        try {
+            Files.delete(file);
+        } catch (IOException e) {
+            throw failed("문서를 삭제할 수 없습니다: " + e.getMessage());
+        }
+    }
+
+    /** Delete a folder and all of its contents recursively. */
+    public void deleteDirectory(String relativePath) {
+        Path dir = resolveDirectory(relativePath);
+        try (Stream<Path> walk = Files.walk(dir)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch (IOException | UncheckedIOException e) {
+            throw failed("폴더를 삭제할 수 없습니다: " + e.getMessage());
+        }
+    }
+
     /** 폴더 이름 변경. 반환값은 새 상대 경로. */
     public String renameDirectory(String relativePath, String newName) {
         Path source = resolveDirectory(relativePath);

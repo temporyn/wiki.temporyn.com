@@ -82,6 +82,27 @@
       .then(function (j) { followDirectory(path, j.path); }).catch(fail);
   }
 
+  /* ── 삭제 ──────────────────────────────────────────────────────────── */
+  function afterDelete(path, isDirectory) {
+    var affectsCurrent = isDirectory
+      ? (currentPath === path || currentPath.indexOf(path + '/') === 0)
+      : (currentPath === path);
+    if (affectsCurrent) location.href = '/';
+    else reload();
+  }
+
+  function deleteArticle(path, name) {
+    if (!confirm('문서 "' + name + '"을(를) 삭제할까요? 되돌릴 수 없습니다.')) return;
+    post('/api/articles/delete', { path: path })
+      .then(function () { afterDelete(path, false); }).catch(fail);
+  }
+
+  function deleteDirectory(path, name) {
+    if (!confirm('폴더 "' + name + '"와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    post('/api/directories/delete', { path: path })
+      .then(function () { afterDelete(path, true); }).catch(fail);
+  }
+
   /* ── 펼치기 / 접기 ─────────────────────────────────────────────────── */
   function saveOpen(ids) {
     try { localStorage.setItem(OPEN_KEY, JSON.stringify(ids)); } catch (e) {}
@@ -146,14 +167,16 @@
             location.href = '/edit/' + fPath.split('/').map(encodeURIComponent).join('/');
           }
         },
-        { label: '이름 변경', action: function () { renameArticle(fPath, fName); } }
+        { label: '이름 변경', action: function () { renameArticle(fPath, fName); } },
+        { label: '삭제', action: function () { deleteArticle(fPath, fName); }, separated: true }
       ];
     } else if (dir) {
       var dPath = dir.dataset.path, dName = dir.dataset.name;
       items = [
         { label: '새 문서', action: function () { createArticle(dPath); } },
         { label: '새 하위 폴더', action: function () { createDirectory(dPath); } },
-        { label: '이름 변경', action: function () { renameDirectory(dPath, dName); } }
+        { label: '이름 변경', action: function () { renameDirectory(dPath, dName); } },
+        { label: '삭제', action: function () { deleteDirectory(dPath, dName); }, separated: true }
       ];
     } else {
       /* 빈 공간에서만 트리 전체 조작을 제공한다. */

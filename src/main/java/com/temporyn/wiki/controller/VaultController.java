@@ -48,6 +48,18 @@ public class VaultController {
         return viewResponse(vaultService.moveArticle(request.path(), request.targetPath()));
     }
 
+    @PostMapping("/directories/delete")
+    public Map<String, String> deleteDirectory(@RequestBody DeleteRequest request) {
+        vaultService.deleteDirectory(request.path());
+        return Map.of("path", request.path());
+    }
+
+    @PostMapping("/articles/delete")
+    public Map<String, String> deleteArticle(@RequestBody DeleteRequest request) {
+        vaultService.deleteArticle(request.path());
+        return Map.of("path", request.path());
+    }
+
     private Map<String, String> viewResponse(String path) {
         return Map.of("path", path, "url", "/view/" + path);
     }
@@ -59,5 +71,8 @@ public class VaultController {
     }
 
     public record MoveRequest(String path, String targetPath) {
+    }
+
+    public record DeleteRequest(String path) {
     }
 }
