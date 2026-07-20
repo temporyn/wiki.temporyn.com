@@ -14,7 +14,7 @@ RUN ./gradlew --no-daemon clean bootJar \
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-RUN addgroup -S kkmaddress && adduser -S kkmaddress -G kkmaddress
+RUN addgroup -g 1000 kkmaddress && adduser -D -u 1000 -G kkmaddress kkmaddress
 COPY --from=build /workspace/app.jar ./app.jar
 RUN mkdir -p logs/auth && chown -R kkmaddress:kkmaddress /app
 USER kkmaddress
