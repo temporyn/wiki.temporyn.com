@@ -1,0 +1,9 @@
+.git
+.gradle
+.vscode
+build
+logs
+data
+frontend/tiptap/node_modules
+Architecture.md
+HELP.md
