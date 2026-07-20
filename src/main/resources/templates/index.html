@@ -115,6 +115,18 @@
 
   <ul id="context-menu" class="context-menu" hidden></ul>
 
+  <div id="app-modal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 id="modal-title" class="modal-title"></h2>
+      <p id="modal-message" class="modal-message" hidden></p>
+      <input id="modal-input" class="modal-input" type="text" hidden>
+      <div class="modal-actions">
+        <button type="button" id="modal-cancel" class="modal-btn modal-btn-cancel"></button>
+        <button type="button" id="modal-confirm" class="modal-btn modal-btn-confirm"></button>
+      </div>
+    </div>
+  </div>
+
   <script src="/assets/js/site.js" defer></script>
   <script src="/assets/js/tree-menu.js" defer></script>
   <script src="/lib/tiptap/2.27.2/tiptap.bundle.js" defer></script>

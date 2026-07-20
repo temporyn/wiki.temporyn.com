@@ -26,8 +26,99 @@
       });
   }
 
-  function fail(e) { alert(e.message || '오류가 발생했습니다.'); }
+  function fail(e) { alertModal('오류', e.message || '오류가 발생했습니다.'); }
   function reload() { location.reload(); }
+
+  /* ── Modal (replaces native prompt/confirm) ────────────────────────── */
+  var modal = {
+    overlay: document.getElementById('app-modal'),
+    title: document.getElementById('modal-title'),
+    message: document.getElementById('modal-message'),
+    input: document.getElementById('modal-input'),
+    cancel: document.getElementById('modal-cancel'),
+    confirm: document.getElementById('modal-confirm')
+  };
+  var modalClose = null;
+
+  function closeModal(result) {
+    if (!modalClose) return;
+    var resolve = modalClose;
+    modalClose = null;
+    modal.overlay.hidden = true;
+    document.removeEventListener('keydown', onModalKey, true);
+    resolve(result);
+  }
+
+  function onModalKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(null); }
+    else if (e.key === 'Enter' && !modal.input.hidden) { e.preventDefault(); submitModal(); }
+  }
+
+  function submitModal() {
+    if (modal.input.hidden) { closeModal(true); return; }
+    var value = modal.input.value.trim();
+    if (!value) { modal.input.focus(); return; }
+    closeModal(value);
+  }
+
+  function openModal(opts) {
+    if (modalClose) closeModal(null);
+    modal.title.textContent = opts.title || '';
+
+    if (opts.message) { modal.message.textContent = opts.message; modal.message.hidden = false; }
+    else { modal.message.hidden = true; }
+
+    if (opts.input) {
+      modal.input.hidden = false;
+      modal.input.value = opts.value || '';
+      modal.input.placeholder = opts.placeholder || '';
+    } else {
+      modal.input.hidden = true;
+    }
+
+    modal.confirm.textContent = opts.confirmLabel || '확인';
+    modal.cancel.textContent = opts.cancelLabel || '취소';
+    modal.cancel.hidden = !!opts.hideCancel;
+    modal.confirm.classList.toggle('is-danger', !!opts.danger);
+    modal.overlay.hidden = false;
+
+    document.addEventListener('keydown', onModalKey, true);
+    setTimeout(function () {
+      if (opts.input) { modal.input.focus(); modal.input.select(); }
+      else modal.confirm.focus();
+    }, 0);
+
+    return new Promise(function (resolve) { modalClose = resolve; });
+  }
+
+  modal.confirm.addEventListener('click', submitModal);
+  modal.cancel.addEventListener('click', function () { closeModal(null); });
+  modal.overlay.addEventListener('mousedown', function (e) {
+    if (e.target === modal.overlay) closeModal(null);
+  });
+
+  /* Returns entered text, or null when cancelled. */
+  function promptModal(title, opts) {
+    opts = opts || {};
+    return openModal({
+      title: title, input: true, value: opts.value || '', placeholder: opts.placeholder || '',
+      confirmLabel: opts.confirmLabel || '확인'
+    });
+  }
+
+  /* Returns true when confirmed, false/null otherwise. */
+  function confirmModal(title, message, opts) {
+    opts = opts || {};
+    return openModal({
+      title: title, message: message, danger: opts.danger,
+      confirmLabel: opts.confirmLabel || '확인'
+    }).then(function (r) { return r === true; });
+  }
+
+  /* Simple notice with a single confirm button. */
+  function alertModal(title, message) {
+    return openModal({ title: title, message: message, confirmLabel: '확인', hideCancel: true });
+  }
 
   /* 현재 보고 있는(또는 편집 중인) 문서 경로 */
   var currentPath = document.body.dataset.currentPath || '';
@@ -54,32 +145,36 @@
 
   /* ── 생성 ──────────────────────────────────────────────────────────── */
   function createArticle(parentPath) {
-    var name = prompt('새 문서 이름 (확장자 없이)');
-    if (!name) return;
-    post('/api/articles', { parentPath: parentPath, name: name })
-      .then(function (j) { location.href = '/view/' + j.path.split('/').map(encodeURIComponent).join('/'); })
-      .catch(fail);
+    promptModal('새 문서', { placeholder: '문서 이름 (확장자 없이)', confirmLabel: '만들기' }).then(function (name) {
+      if (!name) return;
+      post('/api/articles', { parentPath: parentPath, name: name })
+        .then(function (j) { location.href = '/view/' + j.path.split('/').map(encodeURIComponent).join('/'); })
+        .catch(fail);
+    });
   }
 
   function createDirectory(parentPath) {
-    var name = prompt('새 폴더 이름');
-    if (!name) return;
-    post('/api/directories', { parentPath: parentPath, name: name }).then(reload).catch(fail);
+    promptModal('새 폴더', { placeholder: '폴더 이름', confirmLabel: '만들기' }).then(function (name) {
+      if (!name) return;
+      post('/api/directories', { parentPath: parentPath, name: name }).then(reload).catch(fail);
+    });
   }
 
   /* ── 이름 변경 ─────────────────────────────────────────────────────── */
   function renameArticle(path, current) {
-    var name = prompt('문서 이름 변경', current);
-    if (name == null) return;
-    post('/api/articles/rename', { path: path, name: name })
-      .then(function (j) { followArticle(path, j.path); }).catch(fail);
+    promptModal('문서 이름 변경', { value: current, confirmLabel: '변경' }).then(function (name) {
+      if (name == null) return;
+      post('/api/articles/rename', { path: path, name: name })
+        .then(function (j) { followArticle(path, j.path); }).catch(fail);
+    });
   }
 
   function renameDirectory(path, current) {
-    var name = prompt('폴더 이름 변경', current);
-    if (name == null) return;
-    post('/api/directories/rename', { path: path, name: name })
-      .then(function (j) { followDirectory(path, j.path); }).catch(fail);
+    promptModal('폴더 이름 변경', { value: current, confirmLabel: '변경' }).then(function (name) {
+      if (name == null) return;
+      post('/api/directories/rename', { path: path, name: name })
+        .then(function (j) { followDirectory(path, j.path); }).catch(fail);
+    });
   }
 
   /* ── 삭제 ──────────────────────────────────────────────────────────── */
@@ -92,15 +187,21 @@
   }
 
   function deleteArticle(path, name) {
-    if (!confirm('문서 "' + name + '"을(를) 삭제할까요? 되돌릴 수 없습니다.')) return;
-    post('/api/articles/delete', { path: path })
-      .then(function () { afterDelete(path, false); }).catch(fail);
+    confirmModal('문서 삭제', '"' + name + '"을(를) 삭제할까요? 되돌릴 수 없습니다.', { danger: true, confirmLabel: '삭제' })
+      .then(function (ok) {
+        if (!ok) return;
+        post('/api/articles/delete', { path: path })
+          .then(function () { afterDelete(path, false); }).catch(fail);
+      });
   }
 
   function deleteDirectory(path, name) {
-    if (!confirm('폴더 "' + name + '"와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.')) return;
-    post('/api/directories/delete', { path: path })
-      .then(function () { afterDelete(path, true); }).catch(fail);
+    confirmModal('폴더 삭제', '"' + name + '"와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.', { danger: true, confirmLabel: '삭제' })
+      .then(function (ok) {
+        if (!ok) return;
+        post('/api/directories/delete', { path: path })
+          .then(function () { afterDelete(path, true); }).catch(fail);
+      });
   }
 
   /* ── 펼치기 / 접기 ─────────────────────────────────────────────────── */

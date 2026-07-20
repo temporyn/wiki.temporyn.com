@@ -275,6 +275,38 @@ th { background: var(--bg-2); }
   margin-top: .3rem; padding-top: .55rem; border-top: 1px solid var(--guide); border-radius: 0 0 6px 6px;
 }
 
+/* ── Modal dialog ──────────────────────────────────────────────────────── */
+.modal-overlay[hidden] { display: none; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+  padding: 1rem; background: rgba(0, 0, 0, .45); animation: modal-fade .12s ease-out;
+}
+.modal {
+  width: 100%; max-width: 380px; padding: 1.4rem; background: var(--bg-1);
+  border: 1px solid var(--code-border); border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .3); animation: modal-pop .14s ease-out;
+}
+.modal-title { margin: 0 0 .6rem; font-size: 15px; font-weight: 700; color: var(--tx-1); }
+.modal-message { margin: 0 0 1rem; font-size: 13px; line-height: 1.6; color: var(--tx-2); }
+.modal-input {
+  width: 100%; box-sizing: border-box; margin-bottom: 1.1rem; padding: .55rem .7rem;
+  font-family: inherit; font-size: 14px; color: var(--tx-1);
+  background: var(--bg-2); border: 1px solid var(--guide); border-radius: 8px;
+}
+.modal-input:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display: flex; justify-content: flex-end; gap: .5rem; }
+.modal-btn {
+  padding: .5rem .9rem; font-family: inherit; font-size: 13px; font-weight: 700;
+  border: 0; border-radius: 8px; cursor: pointer;
+}
+.modal-btn-cancel { color: var(--tx-1); background: var(--bg-3); }
+.modal-btn-cancel:hover { filter: brightness(.96); }
+.modal-btn-confirm { color: var(--bg-1); background: var(--accent); }
+.modal-btn-confirm:hover { filter: brightness(1.08); }
+.modal-btn-confirm.is-danger { background: #dc2626; color: #fff; }
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-pop { from { transform: translateY(6px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+
 /* ── Logout ────────────────────────────────────────────────────────────── */
 .logout-btn {
   padding: .45rem .8rem; font-family: inherit; font-size: 13px; font-weight: 700;
