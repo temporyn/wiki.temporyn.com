@@ -40,6 +40,15 @@
       form.addEventListener('submit', function () {
         hidden.value = instance.getMarkdown();
       });
+
+      // Ctrl/Cmd+S saves the document instead of triggering the browser save dialog.
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          if (form.requestSubmit) form.requestSubmit();
+          else form.submit();
+        }
+      });
     }
     return;
   }
