@@ -18,7 +18,7 @@
           th:data-path="${link.path}" th:data-name="${link.title}">
         <a th:if="${link.openable}" th:href="${link.url}" th:text="${link.title}" draggable="true">title</a>
         <a th:unless="${link.openable}" class="tree-file-static" th:href="${link.url}"
-           th:text="${link.title}" download>title</a>
+           th:text="${link.title}" draggable="true" download>title</a>
       </li>
     </ul>
   </li>

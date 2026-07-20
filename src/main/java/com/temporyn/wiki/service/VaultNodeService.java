@@ -70,6 +70,28 @@ public class VaultNodeService {
         return paths.stripMarkdownSuffix(paths.toRelative(renamed));
     }
 
+    /** Rename a non-Markdown file. The original extension is preserved and cannot be changed. */
+    public String renameFile(String relativePath, String newName) {
+        Path source = paths.resolveExistingFile(relativePath);
+        String originalName = source.getFileName().toString();
+        String extension = extensionOf(originalName);
+        String baseName = stripExtension(paths.validateName(newName));
+        if (baseName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a name.");
+        }
+        return paths.toRelative(renameTo(source, baseName + extension));
+    }
+
+    private String extensionOf(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        return dot <= 0 ? "" : fileName.substring(dot);
+    }
+
+    private String stripExtension(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        return dot <= 0 ? fileName : fileName.substring(0, dot);
+    }
+
     /** Move a folder. A blank target moves it to the vault root. */
     public String moveDirectory(String relativePath, String targetParentPath) {
         Path source = paths.resolveDirectory(relativePath);
@@ -88,12 +110,30 @@ public class VaultNodeService {
         return paths.stripMarkdownSuffix(paths.toRelative(moved));
     }
 
+    /** Move a non-Markdown file. A blank target moves it to the vault root. */
+    public String moveFile(String relativePath, String targetParentPath) {
+        Path source = paths.resolveExistingFile(relativePath);
+        Path moved = moveInto(source, targetParentPath == null ? "" : targetParentPath,
+                source.getFileName().toString());
+        return paths.toRelative(moved);
+    }
+
     public void deleteArticle(String relativePath) {
         Path file = paths.resolveArticleFile(relativePath);
         try {
             Files.delete(file);
         } catch (IOException e) {
             throw serverError("Cannot delete document: " + e.getMessage());
+        }
+    }
+
+    /** Delete a non-Markdown file. */
+    public void deleteFile(String relativePath) {
+        Path file = paths.resolveExistingFile(relativePath);
+        try {
+            Files.delete(file);
+        } catch (IOException e) {
+            throw serverError("Cannot delete file: " + e.getMessage());
         }
     }
 

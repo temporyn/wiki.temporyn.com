@@ -44,7 +44,7 @@ Package root: `com.temporyn.wiki`
 | Class | Type | Routes | Delegates to |
 |-------|------|--------|--------------|
 | `PageController` | MVC | `GET /`, `GET /view/**`, `GET /edit/**`, `POST /edit/**`, `GET /login` | `VaultTreeService`, `ArticleService` |
-| `VaultNodeController` | REST | `POST /api/directories`, `/api/articles` (+ `/rename`, `/move`, `/delete`), `POST /api/files` (drag & drop upload) | `VaultNodeService` |
+| `VaultNodeController` | REST | `POST /api/directories`, `/api/articles` (+ `/rename`, `/move`, `/delete`), `POST /api/files` (upload) + `/api/files/rename`, `/move`, `/delete` | `VaultNodeService` |
 | `MediaController` | REST | `POST /api/images`, `GET /media/**`, `POST /api/media/cleanup` | `MediaService` |
 | `FileController` | REST | `GET /download/**` (attachment download of any vault file) | `VaultPathResolver` |
 | `SearchController` | REST | `GET /api/search?q=` | `SearchService` |

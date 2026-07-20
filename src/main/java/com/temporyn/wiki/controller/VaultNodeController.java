@@ -65,6 +65,11 @@ public class VaultNodeController {
         return viewResponse(nodeService.renameArticle(request.path(), request.name()));
     }
 
+    @PostMapping("/files/rename")
+    public Map<String, String> renameFile(@RequestBody RenameRequest request) {
+        return Map.of("path", nodeService.renameFile(request.path(), request.name()));
+    }
+
     @PostMapping("/directories/move")
     public Map<String, String> moveDirectory(@RequestBody MoveRequest request) {
         return Map.of("path", nodeService.moveDirectory(request.path(), request.targetPath()));
@@ -73,6 +78,11 @@ public class VaultNodeController {
     @PostMapping("/articles/move")
     public Map<String, String> moveArticle(@RequestBody MoveRequest request) {
         return viewResponse(nodeService.moveArticle(request.path(), request.targetPath()));
+    }
+
+    @PostMapping("/files/move")
+    public Map<String, String> moveFile(@RequestBody MoveRequest request) {
+        return Map.of("path", nodeService.moveFile(request.path(), request.targetPath()));
     }
 
     @PostMapping("/directories/delete")
@@ -84,6 +94,12 @@ public class VaultNodeController {
     @PostMapping("/articles/delete")
     public Map<String, String> deleteArticle(@RequestBody DeleteRequest request) {
         nodeService.deleteArticle(request.path());
+        return Map.of("path", request.path());
+    }
+
+    @PostMapping("/files/delete")
+    public Map<String, String> deleteFile(@RequestBody DeleteRequest request) {
+        nodeService.deleteFile(request.path());
         return Map.of("path", request.path());
     }
 

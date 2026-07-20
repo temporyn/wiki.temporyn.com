@@ -101,8 +101,8 @@
   function promptModal(title, opts) {
     opts = opts || {};
     return openModal({
-      title: title, input: true, value: opts.value || '', placeholder: opts.placeholder || '',
-      confirmLabel: opts.confirmLabel || 'OK'
+      title: title, message: opts.message, input: true, value: opts.value || '',
+      placeholder: opts.placeholder || '', confirmLabel: opts.confirmLabel || 'OK'
     });
   }
 
@@ -177,6 +177,19 @@
     });
   }
 
+  /* Rename a non-Markdown file. The extension is fixed and only the base name is editable. */
+  function renameFile(path, current) {
+    var dot = current.lastIndexOf('.');
+    var base = dot > 0 ? current.substring(0, dot) : current;
+    var ext = dot > 0 ? current.substring(dot) : '';
+    var opts = { value: base, confirmLabel: 'Rename' };
+    if (ext) opts.message = 'The extension "' + ext + '" is kept unchanged.';
+    promptModal('Rename file', opts).then(function (name) {
+      if (name == null) return;
+      post('/api/files/rename', { path: path, name: name }).then(reload).catch(fail);
+    });
+  }
+
   /* ── Delete ─────────────────────────────────────────────────────── */
   function afterDelete(path, isDirectory) {
     var affectsCurrent = isDirectory
@@ -201,6 +214,15 @@
         if (!ok) return;
         post('/api/directories/delete', { path: path })
           .then(function () { afterDelete(path, true); }).catch(fail);
+      });
+  }
+
+  /* Delete a non-Markdown file. */
+  function deleteFile(path, name) {
+    confirmModal('Delete file', 'Delete "' + name + '"? This cannot be undone.', { danger: true, confirmLabel: 'Delete' })
+      .then(function (ok) {
+        if (!ok) return;
+        post('/api/files/delete', { path: path }).then(reload).catch(fail);
       });
   }
 
@@ -259,9 +281,13 @@
     var dir = e.target.closest('.tree-dir');
     var items;
 
-    // Non-openable files (non-Markdown) have no actions and no owning-folder menu.
+    // Non-openable files (non-Markdown): rename and delete only.
     if (file && file.classList.contains('is-static')) {
-      hideMenu();
+      var sPath = file.dataset.path, sName = file.dataset.name;
+      showMenu(e.clientX, e.clientY, [
+        { label: 'Rename', action: function () { renameFile(sPath, sName); } },
+        { label: 'Delete', action: function () { deleteFile(sPath, sName); }, separated: true }
+      ]);
       return;
     }
 
@@ -363,7 +389,8 @@
     var file = e.target.closest('.tree-file');
     var toggle = e.target.closest('.tree-toggle');
     if (file && e.target.closest('a')) {
-      dragged = { type: 'article', path: file.dataset.path };
+      var type = file.classList.contains('is-static') ? 'file' : 'article';
+      dragged = { type: type, path: file.dataset.path };
     } else if (toggle) {
       dragged = { type: 'directory', path: toggle.closest('.tree-dir').dataset.path };
     } else {
@@ -408,6 +435,9 @@
     if (moving.type === 'article') {
       post('/api/articles/move', { path: moving.path, targetPath: targetPath })
         .then(function (j) { followArticle(moving.path, j.path); }).catch(fail);
+    } else if (moving.type === 'file') {
+      post('/api/files/move', { path: moving.path, targetPath: targetPath })
+        .then(reload).catch(fail);
     } else {
       post('/api/directories/move', { path: moving.path, targetPath: targetPath })
         .then(function (j) { followDirectory(moving.path, j.path); }).catch(fail);
