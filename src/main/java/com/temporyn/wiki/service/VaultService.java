@@ -2,6 +2,7 @@ package com.temporyn.wiki.service;
 
 import com.temporyn.wiki.dto.ArticleLink;
 import com.temporyn.wiki.dto.DirectoryNode;
+import com.temporyn.wiki.dto.SearchResult;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -59,6 +60,78 @@ public class VaultService {
         } catch (IOException e) {
             throw new UncheckedIOException("문서를 읽을 수 없습니다: " + relativePath, e);
         }
+    }
+
+    /** Search documents by title and content. Returns up to {@code limit} matches. */
+    public List<SearchResult> search(String query, int limit) {
+        if (query == null || query.isBlank() || !Files.isDirectory(root)) {
+            return List.of();
+        }
+        String needle = query.strip().toLowerCase();
+        List<SearchResult> results = new ArrayList<>();
+        try (Stream<Path> stream = Files.walk(root)) {
+            List<Path> files = stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(MARKDOWN_SUFFIX))
+                    .filter(path -> !isHidden(path))
+                    .sorted(Comparator.comparing(p -> p.getFileName().toString(), String.CASE_INSENSITIVE_ORDER))
+                    .toList();
+            for (Path file : files) {
+                SearchResult hit = matchArticle(file, needle);
+                if (hit != null) {
+                    results.add(hit);
+                    if (results.size() >= limit) {
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw failed("검색에 실패했습니다: " + e.getMessage());
+        }
+        return results;
+    }
+
+    private boolean isHidden(Path file) {
+        Path relative = root.relativize(file);
+        for (Path segment : relative) {
+            if (segment.toString().startsWith(".")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private SearchResult matchArticle(Path file, String needle) {
+        String relative = stripSuffix(relativeOf(file));
+        String title = relative.substring(relative.lastIndexOf('/') + 1);
+        boolean titleHit = title.toLowerCase().contains(needle);
+
+        String content;
+        try {
+            content = Files.readString(file, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            log.warn("문서를 읽을 수 없습니다: {}", file, e);
+            content = "";
+        }
+        int idx = content.toLowerCase().indexOf(needle);
+        if (!titleHit && idx < 0) {
+            return null;
+        }
+        String snippet = idx >= 0 ? buildSnippet(content, idx, needle.length()) : "";
+        return new SearchResult(title, relative, viewUrl(relative), snippet);
+    }
+
+    private String buildSnippet(String content, int index, int needleLength) {
+        String flat = content.replaceAll("\\s+", " ").trim();
+        String lower = flat.toLowerCase();
+        int at = lower.indexOf(content.substring(index, index + needleLength).toLowerCase());
+        if (at < 0) {
+            at = 0;
+        }
+        int start = Math.max(0, at - 30);
+        int end = Math.min(flat.length(), at + needleLength + 40);
+        String slice = flat.substring(start, end);
+        return (start > 0 ? "…" : "") + slice + (end < flat.length() ? "…" : "");
     }
 
     /** 폴더 생성. 반환값은 볼트 상대 경로. */

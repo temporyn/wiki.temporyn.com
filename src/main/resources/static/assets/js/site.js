@@ -80,43 +80,29 @@
     });
   })();
 
-  /* ── 전문 검색 ─────────────────────────────────────────────────────── */
+  /* ── 전문 검색 (제목 + 내용, 서버 검색) ────────────────────────────── */
   (function search() {
     var input = document.getElementById('search-input');
     var results = document.getElementById('search-results');
     var navTree = document.getElementById('nav-tree');
     if (!input || !results || !navTree) return;
 
-    var index = null, loading = false;
-
-    function ensureIndex(cb) {
-      if (index) return cb();
-      if (loading) return;
-      loading = true;
-      fetch(BASE + '/assets/search-index.json')
-        .then(function (r) { return r.json(); })
-        .then(function (data) { index = data; loading = false; cb(); })
-        .catch(function () { loading = false; });
-    }
+    var timer = null;
+    var seq = 0;
 
     function showTree() {
       results.hidden = true;
       results.innerHTML = '';
       navTree.hidden = false;
     }
-    function snippet(text, q) {
-      var i = text.toLowerCase().indexOf(q);
-      if (i < 0) return '';
-      var start = Math.max(0, i - 25);
-      return (start > 0 ? '…' : '') + text.substr(start, 70) + '…';
-    }
-    function render(q) {
-      var ql = q.toLowerCase();
-      var hits = index.filter(function (d) {
-        return d.title.toLowerCase().indexOf(ql) >= 0 ||
-               (d.content && d.content.toLowerCase().indexOf(ql) >= 0);
-      }).slice(0, 30);
 
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    function render(hits) {
       navTree.hidden = true;
       results.hidden = false;
       if (!hits.length) {
@@ -124,26 +110,37 @@
         return;
       }
       results.innerHTML = hits.map(function (d) {
-        var s = snippet(d.content || '', ql);
         return '<li><a href="' + d.url + '">' +
                escapeHtml(d.title) +
-               '<span class="sr-cat">' + escapeHtml(d.category || '') +
-               (s ? ' · ' + escapeHtml(s) : '') + '</span></a></li>';
+               (d.snippet ? '<span class="sr-cat">' + escapeHtml(d.snippet) + '</span>' : '') +
+               '</a></li>';
       }).join('');
     }
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"]/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-      });
+
+    function run(q) {
+      var mine = ++seq;
+      fetch(BASE + '/api/search?q=' + encodeURIComponent(q))
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (hits) {
+          if (mine !== seq) return; // ignore stale responses
+          render(hits);
+        })
+        .catch(function () {
+          if (mine !== seq) return;
+          results.hidden = false;
+          navTree.hidden = true;
+          results.innerHTML = '<li class="sr-empty">검색에 실패했습니다</li>';
+        });
     }
 
     input.addEventListener('input', function () {
       var q = input.value.trim();
-      if (!q) { showTree(); return; }
-      ensureIndex(function () { render(q); });
+      clearTimeout(timer);
+      if (!q) { seq++; showTree(); return; }
+      timer = setTimeout(function () { run(q); }, 200);
     });
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { input.value = ''; showTree(); input.blur(); }
+      if (e.key === 'Escape') { input.value = ''; clearTimeout(timer); seq++; showTree(); input.blur(); }
     });
   })();
 

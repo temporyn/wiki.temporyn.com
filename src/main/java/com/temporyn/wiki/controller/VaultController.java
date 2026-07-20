@@ -1,10 +1,14 @@
 package com.temporyn.wiki.controller;
 
+import com.temporyn.wiki.dto.SearchResult;
 import com.temporyn.wiki.service.VaultService;
+import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** 사이드바에서 폴더/문서를 만들고, 이름을 바꾸고, 옮긴다. 삭제는 볼트에서 직접 처리한다. */
@@ -63,6 +67,11 @@ public class VaultController {
     @PostMapping("/media/cleanup")
     public Map<String, Integer> cleanupMedia() {
         return Map.of("deleted", vaultService.cleanupOrphanMedia());
+    }
+
+    @GetMapping("/search")
+    public List<SearchResult> search(@RequestParam("q") String query) {
+        return vaultService.search(query, 30);
     }
 
     private Map<String, String> viewResponse(String path) {
