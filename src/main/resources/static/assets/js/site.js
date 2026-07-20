@@ -1,15 +1,15 @@
-/* Temporyn — 테마 토글 / 트리 / 검색 */
+/* Temporyn — theme toggle, sidebar tree, and search */
 (function () {
   'use strict';
 
   var BASE = (document.body && document.body.dataset.baseurl) || '';
 
-  /* ── 테마 토글 (localStorage 저장) ─────────────────────────────────── */
+  /* ── Theme toggle (persisted in localStorage) ──────────────────────── */
   (function themeToggle() {
     var btn = document.getElementById('theme-toggle');
     if (!btn) return;
 
-    // 기본은 항상 라이트. 시스템 설정은 참조하지 않는다.
+    // Always default to light; the system preference is intentionally ignored.
     function current() {
       return document.documentElement.getAttribute('data-theme') || 'light';
     }
@@ -20,7 +20,7 @@
     });
   })();
 
-  /* ── 사이드바 트리 ─────────────────────────────────────────────────── */
+  /* ── Sidebar tree ──────────────────────────────────────────────────── */
   var OPEN_KEY = 'temporyn-open';
 
   function loadOpen() {
@@ -43,12 +43,12 @@
 
     var open = loadOpen();
 
-    // 1) 저장된 펼침 상태 복원
+    // 1) Restore previously expanded folders.
     nav.querySelectorAll('.tree-dir').forEach(function (li) {
       if (open.has(li.dataset.path)) li.classList.add('open');
     });
 
-    // 2) 현재 문서 경로 → active 표시 + 조상 폴더 펼침(상태 저장)
+    // 2) Mark the current article active and expand its ancestor folders (persisting state).
     var cur = normalize(location.pathname);
     var changed = false;
     nav.querySelectorAll('.tree-file').forEach(function (li) {
@@ -68,7 +68,7 @@
     });
     if (changed) saveOpen(open);
 
-    // 3) 폴더 토글
+    // 3) Toggle folders on click.
     nav.addEventListener('click', function (e) {
       var btn = e.target.closest('.tree-toggle');
       if (!btn) return;
@@ -80,7 +80,7 @@
     });
   })();
 
-  /* ── 전문 검색 (제목 + 내용, 서버 검색) ────────────────────────────── */
+  /* ── Full-text search (title + content, server-side) ───────────────── */
   (function search() {
     var input = document.getElementById('search-input');
     var results = document.getElementById('search-results');
@@ -106,7 +106,7 @@
       navTree.hidden = true;
       results.hidden = false;
       if (!hits.length) {
-        results.innerHTML = '<li class="sr-empty">검색 결과 없음</li>';
+        results.innerHTML = '<li class="sr-empty">No results</li>';
         return;
       }
       results.innerHTML = hits.map(function (d) {
@@ -129,7 +129,7 @@
           if (mine !== seq) return;
           results.hidden = false;
           navTree.hidden = true;
-          results.innerHTML = '<li class="sr-empty">검색에 실패했습니다</li>';
+          results.innerHTML = '<li class="sr-empty">Search failed</li>';
         });
     }
 
@@ -144,7 +144,7 @@
     });
   })();
 
-  /* ── 모바일 사이드바 ───────────────────────────────────────────────── */
+  /* ── Mobile sidebar ────────────────────────────────────────────────── */
   (function mobileSidebar() {
     var btn = document.getElementById('sidebar-toggle');
     var sidebar = document.getElementById('sidebar');

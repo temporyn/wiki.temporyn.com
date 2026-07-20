@@ -1,7 +1,8 @@
 package com.temporyn.wiki.controller;
 
-import com.temporyn.wiki.service.VaultService;
+import com.temporyn.wiki.service.MediaService;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -21,9 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriUtils;
 
-import java.nio.charset.StandardCharsets;
-
-/** Handles local image uploads into the vault and serves them back for the editor and view. */
+/** REST API for local image upload, serving, and orphan cleanup. */
 @RestController
 public class MediaController {
 
@@ -35,31 +34,31 @@ public class MediaController {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".png", ".jpg", ".jpeg", ".gif", ".webp");
     private static final long MAX_BYTES = 10L * 1024 * 1024;
 
-    private final VaultService vaultService;
+    private final MediaService mediaService;
 
-    public MediaController(VaultService vaultService) {
-        this.vaultService = vaultService;
+    public MediaController(MediaService mediaService) {
+        this.mediaService = mediaService;
     }
 
     @PostMapping("/api/images")
     public Map<String, String> upload(@RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file provided.");
         }
         if (file.getSize() > MAX_BYTES) {
-            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "이미지는 10MB 이하만 가능합니다.");
+            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "Image must be 10MB or smaller.");
         }
         String extension = ALLOWED.get(file.getContentType());
         if (extension == null) {
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 이미지 형식입니다.");
+            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported image format.");
         }
         byte[] data;
         try {
             data = file.getBytes();
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지를 읽을 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot read the image.");
         }
-        String relativePath = vaultService.saveMedia(data, extension);
+        String relativePath = mediaService.store(data, extension);
         return Map.of("url", "/media/" + UriUtils.encodePath(relativePath, StandardCharsets.UTF_8));
     }
 
@@ -67,9 +66,9 @@ public class MediaController {
     public ResponseEntity<Resource> serve(@PathVariable String path) {
         String relativePath = path.startsWith("/") ? path.substring(1) : path;
         if (!hasAllowedExtension(relativePath)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found.");
         }
-        Path file = vaultService.resolveMedia(relativePath);
+        Path file = mediaService.resolveFile(relativePath);
         MediaType contentType = MediaType.APPLICATION_OCTET_STREAM;
         try {
             String probed = Files.probeContentType(file);
@@ -83,6 +82,11 @@ public class MediaController {
                 .contentType(contentType)
                 .header(HttpHeaders.CACHE_CONTROL, "max-age=31536000, immutable")
                 .body(new FileSystemResource(file));
+    }
+
+    @PostMapping("/api/media/cleanup")
+    public Map<String, Integer> cleanup() {
+        return Map.of("deleted", mediaService.cleanupOrphans());
     }
 
     private boolean hasAllowedExtension(String relativePath) {

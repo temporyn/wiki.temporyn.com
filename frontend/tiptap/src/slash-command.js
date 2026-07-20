@@ -4,64 +4,64 @@ import tippy from 'tippy.js';
 
 const items = [
   {
-    title: '텍스트',
-    keywords: ['text', 'paragraph', '텍스트', '본문'],
+    title: 'Text',
+    keywords: ['text', 'paragraph', 'body'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setParagraph().run(),
   },
   {
-    title: '제목 1',
-    keywords: ['h1', 'heading', '제목'],
+    title: 'Heading 1',
+    keywords: ['h1', 'heading', 'title'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run(),
   },
   {
-    title: '제목 2',
-    keywords: ['h2', 'heading', '제목'],
+    title: 'Heading 2',
+    keywords: ['h2', 'heading', 'title'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run(),
   },
   {
-    title: '제목 3',
-    keywords: ['h3', 'heading', '제목'],
+    title: 'Heading 3',
+    keywords: ['h3', 'heading', 'title'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run(),
   },
   {
-    title: '글머리 목록',
-    keywords: ['bullet', 'unordered', 'list', '목록'],
+    title: 'Bullet list',
+    keywords: ['bullet', 'unordered', 'list'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleBulletList().run(),
   },
   {
-    title: '번호 목록',
-    keywords: ['ordered', 'number', 'list', '번호'],
+    title: 'Numbered list',
+    keywords: ['ordered', 'number', 'list'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleOrderedList().run(),
   },
   {
-    title: '체크리스트',
-    keywords: ['task', 'todo', 'check', '체크', '할일'],
+    title: 'Checklist',
+    keywords: ['task', 'todo', 'check'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleTaskList().run(),
   },
   {
-    title: '인용',
-    keywords: ['quote', 'blockquote', '인용'],
+    title: 'Quote',
+    keywords: ['quote', 'blockquote'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleBlockquote().run(),
   },
   {
-    title: '코드 블록',
-    keywords: ['code', 'codeblock', '코드'],
+    title: 'Code block',
+    keywords: ['code', 'codeblock'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
   },
   {
-    title: '구분선',
-    keywords: ['divider', 'hr', 'rule', '구분'],
+    title: 'Divider',
+    keywords: ['divider', 'hr', 'rule'],
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setHorizontalRule().run(),
   },
   {
-    title: '표',
-    keywords: ['table', '표'],
+    title: 'Table',
+    keywords: ['table', 'grid'],
     command: ({ editor, range }) =>
       editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
   },
   {
-    title: '이미지',
-    keywords: ['image', 'picture', '이미지', '그림'],
+    title: 'Image',
+    keywords: ['image', 'picture', 'photo'],
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
       const upload = editor.storage.imageUpload && editor.storage.imageUpload.handler;
@@ -78,7 +78,7 @@ const items = [
             }
           })
           .catch(() => {
-            window.alert('이미지 업로드에 실패했습니다.');
+            window.alert('Image upload failed.');
           });
       });
       input.click();
@@ -103,7 +103,7 @@ class SlashMenuView {
     if (this.items.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'tiptap-slash-empty';
-      empty.textContent = '결과 없음';
+      empty.textContent = 'No results';
       this.root.appendChild(empty);
       return;
     }

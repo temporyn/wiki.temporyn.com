@@ -38,7 +38,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /** 관리자 계정은 설정(환경변수)으로 관리한다. 비밀번호는 BCrypt 해시를 그대로 넣는다. */
+    /** The single admin account is configured via environment variables; the password is a BCrypt hash. */
     @Bean
     UserDetailsService userDetailsService(
             @Value("${app.admin.username}") String username,

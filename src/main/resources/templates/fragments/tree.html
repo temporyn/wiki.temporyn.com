@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
   <li th:fragment="dirNode(node)" class="tree-dir" th:data-path="${node.path}" th:data-name="${node.name}">
     <button class="tree-toggle" type="button" draggable="true">
       <span class="tree-caret" aria-hidden="true"></span>
       <span class="tree-label" th:text="${node.name}">name</span>
       <span class="tree-count" th:text="${node.articleCount}"
-            th:title="|문서 ${node.articleCount}개|">0</span>
+            th:title="|${node.articleCount} documents|">0</span>
     </button>
     <ul class="tree">
       <th:block th:each="child : ${node.children}">

@@ -1,7 +1,7 @@
-/* 사이드바 조작
-   - 우클릭: 문서(수정/이름 변경), 폴더(새 문서·하위 폴더/이름 변경), 빈 공간(최상위 생성)
-   - 드래그&드롭: 문서·폴더를 다른 폴더로 이동 (빈 공간에 놓으면 최상위)
-   삭제는 볼트(Obsidian 등)에서 직접 처리한다. */
+/* Sidebar operations
+   - Context menu: article (edit / rename / delete), folder (new doc / subfolder / rename / delete),
+     empty space (top-level create, expand/collapse all)
+   - Drag & drop: move an article or folder into another folder (drop on empty space = top level) */
 (function () {
   'use strict';
 
@@ -21,12 +21,12 @@
       .then(function (res) {
         if (res.ok) return res.json();
         return res.json().catch(function () { return {}; }).then(function (j) {
-          throw new Error(j.message || j.error || ('요청 실패 (' + res.status + ')'));
+          throw new Error(j.message || j.error || ('Request failed (' + res.status + ')'));
         });
       });
   }
 
-  function fail(e) { alertModal('오류', e.message || '오류가 발생했습니다.'); }
+  function fail(e) { alertModal('Error', e.message || 'Something went wrong.'); }
   function reload() { location.reload(); }
 
   /* ── Modal (replaces native prompt/confirm) ────────────────────────── */
@@ -76,8 +76,8 @@
       modal.input.hidden = true;
     }
 
-    modal.confirm.textContent = opts.confirmLabel || '확인';
-    modal.cancel.textContent = opts.cancelLabel || '취소';
+    modal.confirm.textContent = opts.confirmLabel || 'OK';
+    modal.cancel.textContent = opts.cancelLabel || 'Cancel';
     modal.cancel.hidden = !!opts.hideCancel;
     modal.confirm.classList.toggle('is-danger', !!opts.danger);
     modal.overlay.hidden = false;
@@ -102,7 +102,7 @@
     opts = opts || {};
     return openModal({
       title: title, input: true, value: opts.value || '', placeholder: opts.placeholder || '',
-      confirmLabel: opts.confirmLabel || '확인'
+      confirmLabel: opts.confirmLabel || 'OK'
     });
   }
 
@@ -111,25 +111,25 @@
     opts = opts || {};
     return openModal({
       title: title, message: message, danger: opts.danger,
-      confirmLabel: opts.confirmLabel || '확인'
+      confirmLabel: opts.confirmLabel || 'OK'
     }).then(function (r) { return r === true; });
   }
 
   /* Simple notice with a single confirm button. */
   function alertModal(title, message) {
-    return openModal({ title: title, message: message, confirmLabel: '확인', hideCancel: true });
+    return openModal({ title: title, message: message, confirmLabel: 'OK', hideCancel: true });
   }
 
-  /* 현재 보고 있는(또는 편집 중인) 문서 경로 */
+  /* Path of the article currently being viewed or edited. */
   var currentPath = document.body.dataset.currentPath || '';
   var currentMode = document.body.dataset.currentMode === 'edit' ? 'edit' : 'view';
 
-  /* 경로에 공백·한글이 있어도 안전하도록 세그먼트별로 인코딩한다. */
+  /* Encode each path segment so spaces and non-ASCII names stay valid in URLs. */
   function pathUrl(path) {
     return '/' + currentMode + '/' + path.split('/').map(encodeURIComponent).join('/');
   }
 
-  /* 이름 변경·이동으로 현재 문서의 경로가 바뀌면 새 경로로 이동하고, 아니면 트리만 갱신한다. */
+  /* When a rename/move changes the current document's path, navigate there; otherwise just refresh the tree. */
   function followArticle(oldPath, newPath) {
     if (currentPath === oldPath) location.href = pathUrl(newPath);
     else reload();
@@ -143,9 +143,9 @@
     }
   }
 
-  /* ── 생성 ──────────────────────────────────────────────────────────── */
+  /* ── Create ─────────────────────────────────────────────────────── */
   function createArticle(parentPath) {
-    promptModal('새 문서', { placeholder: '문서 이름 (확장자 없이)', confirmLabel: '만들기' }).then(function (name) {
+    promptModal('New document', { placeholder: 'Document name (no extension)', confirmLabel: 'Create' }).then(function (name) {
       if (!name) return;
       post('/api/articles', { parentPath: parentPath, name: name })
         .then(function (j) { location.href = '/view/' + j.path.split('/').map(encodeURIComponent).join('/'); })
@@ -154,15 +154,15 @@
   }
 
   function createDirectory(parentPath) {
-    promptModal('새 폴더', { placeholder: '폴더 이름', confirmLabel: '만들기' }).then(function (name) {
+    promptModal('New folder', { placeholder: 'Folder name', confirmLabel: 'Create' }).then(function (name) {
       if (!name) return;
       post('/api/directories', { parentPath: parentPath, name: name }).then(reload).catch(fail);
     });
   }
 
-  /* ── 이름 변경 ─────────────────────────────────────────────────────── */
+  /* ── Rename ────────────────────────────────────────────────────── */
   function renameArticle(path, current) {
-    promptModal('문서 이름 변경', { value: current, confirmLabel: '변경' }).then(function (name) {
+    promptModal('Rename document', { value: current, confirmLabel: 'Rename' }).then(function (name) {
       if (name == null) return;
       post('/api/articles/rename', { path: path, name: name })
         .then(function (j) { followArticle(path, j.path); }).catch(fail);
@@ -170,14 +170,14 @@
   }
 
   function renameDirectory(path, current) {
-    promptModal('폴더 이름 변경', { value: current, confirmLabel: '변경' }).then(function (name) {
+    promptModal('Rename folder', { value: current, confirmLabel: 'Rename' }).then(function (name) {
       if (name == null) return;
       post('/api/directories/rename', { path: path, name: name })
         .then(function (j) { followDirectory(path, j.path); }).catch(fail);
     });
   }
 
-  /* ── 삭제 ──────────────────────────────────────────────────────────── */
+  /* ── Delete ─────────────────────────────────────────────────────── */
   function afterDelete(path, isDirectory) {
     var affectsCurrent = isDirectory
       ? (currentPath === path || currentPath.indexOf(path + '/') === 0)
@@ -187,7 +187,7 @@
   }
 
   function deleteArticle(path, name) {
-    confirmModal('문서 삭제', '"' + name + '"을(를) 삭제할까요? 되돌릴 수 없습니다.', { danger: true, confirmLabel: '삭제' })
+    confirmModal('Delete document', 'Delete "' + name + '"? This cannot be undone.', { danger: true, confirmLabel: 'Delete' })
       .then(function (ok) {
         if (!ok) return;
         post('/api/articles/delete', { path: path })
@@ -196,7 +196,7 @@
   }
 
   function deleteDirectory(path, name) {
-    confirmModal('폴더 삭제', '"' + name + '"와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.', { danger: true, confirmLabel: '삭제' })
+    confirmModal('Delete folder', 'Delete "' + name + '" and all of its contents? This cannot be undone.', { danger: true, confirmLabel: 'Delete' })
       .then(function (ok) {
         if (!ok) return;
         post('/api/directories/delete', { path: path })
@@ -204,7 +204,7 @@
       });
   }
 
-  /* ── 펼치기 / 접기 ─────────────────────────────────────────────────── */
+  /* ── Expand / collapse ──────────────────────────────────────────────── */
   function saveOpen(ids) {
     try { localStorage.setItem(OPEN_KEY, JSON.stringify(ids)); } catch (e) {}
   }
@@ -221,7 +221,7 @@
     saveOpen([]);
   }
 
-  /* ── 컨텍스트 메뉴 ─────────────────────────────────────────────────── */
+  /* ── Context menu ──────────────────────────────────────────────────── */
   function hideMenu() { menu.hidden = true; }
 
   function showMenu(x, y, items) {
@@ -263,29 +263,29 @@
       var fPath = file.dataset.path, fName = file.dataset.name;
       items = [
         {
-          label: '수정',
+          label: 'Edit',
           action: function () {
             location.href = '/edit/' + fPath.split('/').map(encodeURIComponent).join('/');
           }
         },
-        { label: '이름 변경', action: function () { renameArticle(fPath, fName); } },
-        { label: '삭제', action: function () { deleteArticle(fPath, fName); }, separated: true }
+        { label: 'Rename', action: function () { renameArticle(fPath, fName); } },
+        { label: 'Delete', action: function () { deleteArticle(fPath, fName); }, separated: true }
       ];
     } else if (dir) {
       var dPath = dir.dataset.path, dName = dir.dataset.name;
       items = [
-        { label: '새 문서', action: function () { createArticle(dPath); } },
-        { label: '새 하위 폴더', action: function () { createDirectory(dPath); } },
-        { label: '이름 변경', action: function () { renameDirectory(dPath, dName); } },
-        { label: '삭제', action: function () { deleteDirectory(dPath, dName); }, separated: true }
+        { label: 'New document', action: function () { createArticle(dPath); } },
+        { label: 'New subfolder', action: function () { createDirectory(dPath); } },
+        { label: 'Rename', action: function () { renameDirectory(dPath, dName); } },
+        { label: 'Delete', action: function () { deleteDirectory(dPath, dName); }, separated: true }
       ];
     } else {
-      /* 빈 공간에서만 트리 전체 조작을 제공한다. */
+      /* Only empty space offers whole-tree actions. */
       items = [
-        { label: '새 문서', action: function () { createArticle(''); } },
-        { label: '새 폴더', action: function () { createDirectory(''); } },
-        { label: '전체 펼치기', action: expandAll, separated: true },
-        { label: '전체 접기', action: collapseAll }
+        { label: 'New document', action: function () { createArticle(''); } },
+        { label: 'New folder', action: function () { createDirectory(''); } },
+        { label: 'Expand all', action: expandAll, separated: true },
+        { label: 'Collapse all', action: collapseAll }
       ];
     }
 
@@ -296,17 +296,17 @@
   document.addEventListener('scroll', hideMenu, true);
   window.addEventListener('resize', hideMenu);
 
-  /* ── 고아 이미지 정리 ──────────────────────────────────────────────── */
+  /* ── Orphan image cleanup ──────────────────────────────────────────── */
   var cleanupBtn = document.getElementById('media-cleanup');
   if (cleanupBtn) {
     cleanupBtn.addEventListener('click', function () {
-      confirmModal('미참조 이미지 정리', '어떤 문서에서도 참조하지 않는 이미지를 삭제합니다. 진행할까요?', { confirmLabel: '정리' })
+      confirmModal('Clean up unused images', 'This deletes images that no document references. Continue?', { confirmLabel: 'Clean up' })
         .then(function (ok) {
           if (!ok) return;
           cleanupBtn.classList.add('is-busy');
           post('/api/media/cleanup', {})
             .then(function (j) {
-              alertModal('정리 완료', (j.deleted || 0) + '개의 미참조 이미지를 삭제했습니다.');
+              alertModal('Cleanup complete', 'Deleted ' + (j.deleted || 0) + ' unused image(s).');
             })
             .catch(fail)
             .then(function () { cleanupBtn.classList.remove('is-busy'); });
@@ -314,7 +314,7 @@
     });
   }
 
-  /* ── 드래그 & 드롭 이동 ────────────────────────────────────────────── */
+  /* ── Drag & drop move ──────────────────────────────────────────────── */
   var dragged = null;
 
   function clearDropTargets() {

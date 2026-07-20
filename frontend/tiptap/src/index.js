@@ -28,12 +28,12 @@ const ImageUpload = Extension.create({
 });
 
 const BUBBLE_BUTTONS = [
-  { label: 'B', title: '굵게', className: 'tt-b-bold', isActive: 'bold', run: (c) => c.toggleBold() },
-  { label: 'i', title: '기울임', className: 'tt-b-italic', isActive: 'italic', run: (c) => c.toggleItalic() },
-  { label: 'S', title: '취소선', className: 'tt-b-strike', isActive: 'strike', run: (c) => c.toggleStrike() },
-  { label: '</>', title: '인라인 코드', className: 'tt-b-code', isActive: 'code', run: (c) => c.toggleCode() },
-  { label: 'H1', title: '제목 1', className: 'tt-b-h1', isActive: ['heading', { level: 1 }], run: (c) => c.toggleHeading({ level: 1 }) },
-  { label: 'H2', title: '제목 2', className: 'tt-b-h2', isActive: ['heading', { level: 2 }], run: (c) => c.toggleHeading({ level: 2 }) },
+  { label: 'B', title: 'Bold', className: 'tt-b-bold', isActive: 'bold', run: (c) => c.toggleBold() },
+  { label: 'i', title: 'Italic', className: 'tt-b-italic', isActive: 'italic', run: (c) => c.toggleItalic() },
+  { label: 'S', title: 'Strikethrough', className: 'tt-b-strike', isActive: 'strike', run: (c) => c.toggleStrike() },
+  { label: '</>', title: 'Inline code', className: 'tt-b-code', isActive: 'code', run: (c) => c.toggleCode() },
+  { label: 'H1', title: 'Heading 1', className: 'tt-b-h1', isActive: ['heading', { level: 1 }], run: (c) => c.toggleHeading({ level: 1 }) },
+  { label: 'H2', title: 'Heading 2', className: 'tt-b-h2', isActive: ['heading', { level: 2 }], run: (c) => c.toggleHeading({ level: 2 }) },
 ];
 
 function buildBubbleMenu(getEditor) {
@@ -59,7 +59,7 @@ function buildBubbleMenu(getEditor) {
   const linkButton = document.createElement('button');
   linkButton.type = 'button';
   linkButton.className = 'tiptap-bubble-btn tt-b-link';
-  linkButton.title = '링크';
+  linkButton.title = 'Link';
   linkButton.textContent = '🔗';
   linkButton.addEventListener('mousedown', (event) => {
     event.preventDefault();
@@ -69,7 +69,7 @@ function buildBubbleMenu(getEditor) {
       editor.chain().focus().unsetLink().run();
       return;
     }
-    const url = window.prompt('링크 URL을 입력하세요');
+    const url = window.prompt('Enter the link URL');
     if (url) {
       editor.chain().focus().setLink({ href: url }).run();
     }
@@ -92,7 +92,7 @@ function buildBubbleMenu(getEditor) {
 }
 
 export function createNotionEditor(options) {
-  const { element, content = '', placeholder = '내용을 입력하세요…', editable = true, onUpdate, uploadImage } = options;
+  const { element, content = '', placeholder = 'Type something…', editable = true, onUpdate, uploadImage } = options;
 
   let editorRef = null;
   let bubble = null;
@@ -124,7 +124,7 @@ export function createNotionEditor(options) {
     extensions.push(
       Placeholder.configure({
         placeholder: ({ node }) =>
-          node.type.name === 'heading' ? '제목' : placeholder,
+          node.type.name === 'heading' ? 'Heading' : placeholder,
         showOnlyWhenEditable: true,
       }),
       GlobalDragHandle.configure({ dragHandleWidth: 20, scrollTreshold: 100 }),

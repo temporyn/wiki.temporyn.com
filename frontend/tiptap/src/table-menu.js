@@ -1,16 +1,16 @@
 const TABLE_ACTIONS = [
-  { label: '왼쪽 열 추가', title: '왼쪽에 열 추가', run: (c) => c.addColumnBefore() },
-  { label: '오른쪽 열 추가', title: '오른쪽에 열 추가', run: (c) => c.addColumnAfter() },
-  { label: '열 삭제', title: '현재 열 삭제', run: (c) => c.deleteColumn() },
+  { label: 'Insert column left', title: 'Insert a column to the left', run: (c) => c.addColumnBefore() },
+  { label: 'Insert column right', title: 'Insert a column to the right', run: (c) => c.addColumnAfter() },
+  { label: 'Delete column', title: 'Delete the current column', run: (c) => c.deleteColumn() },
   { separator: true },
-  { label: '위 행 추가', title: '위에 행 추가', run: (c) => c.addRowBefore() },
-  { label: '아래 행 추가', title: '아래에 행 추가', run: (c) => c.addRowAfter() },
-  { label: '행 삭제', title: '현재 행 삭제', run: (c) => c.deleteRow() },
+  { label: 'Insert row above', title: 'Insert a row above', run: (c) => c.addRowBefore() },
+  { label: 'Insert row below', title: 'Insert a row below', run: (c) => c.addRowAfter() },
+  { label: 'Delete row', title: 'Delete the current row', run: (c) => c.deleteRow() },
   { separator: true },
-  { label: '헤더 행', title: '헤더 행 토글', run: (c) => c.toggleHeaderRow() },
-  { label: '셀 병합/분할', title: '선택 셀 병합 또는 분할', run: (c) => c.mergeOrSplit() },
+  { label: 'Header row', title: 'Toggle header row', run: (c) => c.toggleHeaderRow() },
+  { label: 'Merge/split cells', title: 'Merge or split selected cells', run: (c) => c.mergeOrSplit() },
   { separator: true },
-  { label: '표 삭제', title: '표 전체 삭제', className: 'is-danger', run: (c) => c.deleteTable() },
+  { label: 'Delete table', title: 'Delete the entire table', className: 'is-danger', run: (c) => c.deleteTable() },
 ];
 
 export function buildTableMenu(getEditor) {

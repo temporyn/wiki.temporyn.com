@@ -31,7 +31,7 @@
     var instance = window.TemporynTiptap.createNotionEditor({
       element: editMount,
       content: hidden.value,
-      placeholder: '내용을 입력하세요…',
+      placeholder: 'Type something…',
       editable: true,
       uploadImage: uploadImage,
     });

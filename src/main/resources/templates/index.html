@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,19 +44,19 @@
       th:data-current-mode="${editing != null} ? 'edit' : 'view'">
   <header class="topbar">
     <div class="topbar-inner">
-      <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="사이드바 열기">≡</button>
+      <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Open sidebar">≡</button>
       <a class="brand" href="/">Temporyn-Wiki</a>
       <nav class="topnav">
         <button id="media-cleanup" class="theme-toggle" type="button"
-                aria-label="고아 이미지 정리" title="미참조 이미지 정리">
+                aria-label="Clean up unused images" title="Clean up unused images">
           <span class="cleanup-icon" aria-hidden="true"></span>
         </button>
         <button id="theme-toggle" class="theme-toggle" type="button"
-                aria-label="테마 전환" title="라이트/다크 전환">
+                aria-label="Toggle theme" title="Toggle light/dark">
           <span class="theme-icon" aria-hidden="true"></span>
         </button>
         <form th:action="@{/logout}" method="post" style="margin:0">
-          <button type="submit" class="logout-btn">로그아웃</button>
+          <button type="submit" class="logout-btn">Log out</button>
         </form>
       </nav>
     </div>
@@ -69,7 +69,7 @@
                autocomplete="off" spellcheck="false" aria-label="search">
       </div>
       <div class="sidebar-scroll">
-        <nav class="nav" id="nav-tree" aria-label="문서 트리">
+        <nav class="nav" id="nav-tree" aria-label="Document tree">
           <ul class="tree">
             <th:block th:each="child : ${tree.children}">
               <th:block th:replace="~{fragments/tree :: dirNode(${child})}"></th:block>
@@ -86,7 +86,7 @@
     </aside>
 
     <main class="content">
-      <!-- 문서 편집 -->
+      <!-- Article editor -->
       <form th:if="${editing != null}" class="editor" method="post"
             th:action="@{'/edit/' + ${editing.path}}">
         <div class="doc-header">
@@ -98,12 +98,12 @@
         <textarea id="content" name="content" hidden th:text="${editing.content}"></textarea>
         <div id="tiptap-editor" class="tiptap-editor"></div>
         <div class="editor-actions">
-          <button type="submit" class="btn-primary">저장</button>
-          <a class="btn-secondary" th:href="@{'/view/' + ${editing.path}}">취소</a>
+          <button type="submit" class="btn-primary">Save</button>
+          <a class="btn-secondary" th:href="@{'/view/' + ${editing.path}}">Cancel</a>
         </div>
       </form>
 
-      <!-- 문서 조회 -->
+      <!-- Article view -->
       <article th:if="${editing == null and article != null}" class="doc">
         <h1 class="doc-title" th:text="${article.title}">title</h1>
         <p class="doc-path" th:text="${article.breadcrumb}">path</p>

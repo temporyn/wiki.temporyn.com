@@ -1,77 +1,63 @@
 package com.temporyn.wiki.controller;
 
-import com.temporyn.wiki.dto.SearchResult;
-import com.temporyn.wiki.service.VaultService;
-import java.util.List;
+import com.temporyn.wiki.service.VaultNodeService;
 import java.util.Map;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 사이드바에서 폴더/문서를 만들고, 이름을 바꾸고, 옮긴다. 삭제는 볼트에서 직접 처리한다. */
+/** REST API for structural vault operations triggered from the sidebar. */
 @RestController
 @RequestMapping("/api")
-public class VaultController {
+public class VaultNodeController {
 
-    private final VaultService vaultService;
+    private final VaultNodeService nodeService;
 
-    public VaultController(VaultService vaultService) {
-        this.vaultService = vaultService;
+    public VaultNodeController(VaultNodeService nodeService) {
+        this.nodeService = nodeService;
     }
 
     @PostMapping("/directories")
     public Map<String, String> createDirectory(@RequestBody CreateRequest request) {
-        return Map.of("path", vaultService.createDirectory(request.parentPath(), request.name()));
+        return Map.of("path", nodeService.createDirectory(request.parentPath(), request.name()));
     }
 
     @PostMapping("/articles")
     public Map<String, String> createArticle(@RequestBody CreateRequest request) {
-        return viewResponse(vaultService.createArticle(request.parentPath(), request.name()));
+        return viewResponse(nodeService.createArticle(request.parentPath(), request.name()));
     }
 
     @PostMapping("/directories/rename")
     public Map<String, String> renameDirectory(@RequestBody RenameRequest request) {
-        return Map.of("path", vaultService.renameDirectory(request.path(), request.name()));
+        return Map.of("path", nodeService.renameDirectory(request.path(), request.name()));
     }
 
     @PostMapping("/articles/rename")
     public Map<String, String> renameArticle(@RequestBody RenameRequest request) {
-        return viewResponse(vaultService.renameArticle(request.path(), request.name()));
+        return viewResponse(nodeService.renameArticle(request.path(), request.name()));
     }
 
     @PostMapping("/directories/move")
     public Map<String, String> moveDirectory(@RequestBody MoveRequest request) {
-        return Map.of("path", vaultService.moveDirectory(request.path(), request.targetPath()));
+        return Map.of("path", nodeService.moveDirectory(request.path(), request.targetPath()));
     }
 
     @PostMapping("/articles/move")
     public Map<String, String> moveArticle(@RequestBody MoveRequest request) {
-        return viewResponse(vaultService.moveArticle(request.path(), request.targetPath()));
+        return viewResponse(nodeService.moveArticle(request.path(), request.targetPath()));
     }
 
     @PostMapping("/directories/delete")
     public Map<String, String> deleteDirectory(@RequestBody DeleteRequest request) {
-        vaultService.deleteDirectory(request.path());
+        nodeService.deleteDirectory(request.path());
         return Map.of("path", request.path());
     }
 
     @PostMapping("/articles/delete")
     public Map<String, String> deleteArticle(@RequestBody DeleteRequest request) {
-        vaultService.deleteArticle(request.path());
+        nodeService.deleteArticle(request.path());
         return Map.of("path", request.path());
-    }
-
-    @PostMapping("/media/cleanup")
-    public Map<String, Integer> cleanupMedia() {
-        return Map.of("deleted", vaultService.cleanupOrphanMedia());
-    }
-
-    @GetMapping("/search")
-    public List<SearchResult> search(@RequestParam("q") String query) {
-        return vaultService.search(query, 30);
     }
 
     private Map<String, String> viewResponse(String path) {

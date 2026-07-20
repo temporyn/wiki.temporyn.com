@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>로그인 · Temporyn-Wiki</title>
+  <title>Login · Temporyn-Wiki</title>
   <meta name="description" content="Temporyn-Wiki">
 
   <script>
@@ -59,8 +59,8 @@
   <main class="auth">
     <h1>Admin Login</h1>
 
-    <p class="msg msg-error" th:if="${param.error}">아이디 또는 비밀번호가 올바르지 않습니다.</p>
-    <p class="msg msg-info" th:if="${param.logout}">로그아웃되었습니다.</p>
+    <p class="msg msg-error" th:if="${param.error}">Incorrect username or password.</p>
+    <p class="msg msg-info" th:if="${param.logout}">You have been logged out.</p>
 
     <form th:action="@{/login}" method="post">
       <div>
@@ -72,10 +72,10 @@
         <label for="password">Password</label>
         <input type="password" id="password" name="password" autocomplete="current-password" required>
       </div>
-      <button type="submit">로그인</button>
+      <button type="submit">Log in</button>
     </form>
 
-    <a class="back" href="/">← 돌아가기</a>
+    <a class="back" href="/">← Back</a>
   </main>
 
   <script src="/assets/js/site.js" defer></script>
