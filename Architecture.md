@@ -177,7 +177,13 @@ walks `*.md`, matches title/content → flat 1-depth result list in the sidebar.
   source/forwarded IP, user agent, path, device-cookie hash, and placeholders for
   fields pending later work (new IP/device, rate limit, auto-block, mail status).
   Secrets (password, TOTP code/secret, cookies, tokens) are never logged. Override
-  the directory with `LOG_DIR`.
+  the directory with `LOG_DIR`. IPv4-mapped IPv6 addresses are normalized to IPv4.
+- **Reverse proxy / TLS**: TLS is terminated by Nginx; the `prod` profile sets
+  `server.forward-headers-strategy=framework` so the app sees the real client IP
+  (via `X-Forwarded-For`) and treats requests as HTTPS (via `X-Forwarded-Proto`).
+  Session cookies are `Secure`, `HttpOnly`, `SameSite=Lax`. Security headers
+  (HSTS, `X-Content-Type-Options`, `X-Frame-Options=SAMEORIGIN`, `Referrer-Policy`)
+  are set in `SecurityConfig`; HSTS only appears on HTTPS requests.
 
 ---
 
@@ -192,4 +198,4 @@ walks `*.md`, matches title/content → flat 1-depth result list in the sidebar.
 
 **Required configuration** (`application.properties` / env):
 `app.content.dir` (vault path), `app.admin.username`, `app.admin.password-hash`
-(BCrypt), and the optional `app.admin.totp-secret` (Base32; blank disables 2FA). Profiles: `local` (no caching, live reload) and `prod` (Thymeleaf cache on).
+(BCrypt), and the optional `app.admin.totp-secret` (Base32; blank disables 2FA). Profiles: `local` (no caching, live reload) and `prod` (Thymeleaf cache on, forwarded-header handling, secure session cookies, binds `0.0.0.0:8080` for containers).
