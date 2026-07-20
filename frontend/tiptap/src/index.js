@@ -92,7 +92,7 @@ export function createNotionEditor(options) {
     StarterKit.configure({
       codeBlock: { HTMLAttributes: { class: 'tiptap-code-block' } },
     }),
-    Link.configure({ openOnClick: !editable, autolink: true }),
+    Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener noreferrer' } }),
     Image.configure({ inline: false, allowBase64: true }),
     TaskList,
     TaskItem.configure({ nested: true }),
