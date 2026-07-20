@@ -39,3 +39,7 @@ out/
 
 ### App uploads ###
 /data/
+
+### Frontend build ###
+/frontend/tiptap/node_modules/
+/frontend/tiptap/package-lock.json

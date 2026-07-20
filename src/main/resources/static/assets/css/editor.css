@@ -1,6 +1,7 @@
-/* 편집 화면 / 사이드바 드래그 대상 스타일 (temporyn.css 변수 재사용) */
+/* TipTap (Notion-style) editor styles. Reuses temporyn.css variables. */
 
 .editor { display: block; }
+.editor-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .editor-actions { display: flex; align-items: center; gap: .8rem; margin-top: 1.2rem; }
 .btn-primary {
   display: inline-block; padding: .55rem .9rem; font-family: inherit; font-size: 13px; font-weight: 700;
@@ -9,60 +10,108 @@
 .btn-primary:hover { filter: brightness(1.08); text-decoration: none; }
 .btn-secondary { font-size: 13px; color: var(--tx-2); }
 
-.md-tools { display: flex; gap: .4rem; flex: 0 0 auto; }
-.md-tool {
-  font-family: inherit; font-size: 12.5px; color: var(--tx-2);
-  background: var(--bg-2); border: 0; border-radius: 6px; padding: .3rem .6rem; cursor: pointer;
+/* Editing surface */
+.tiptap-editor {
+  margin-top: 1rem;
+  background: var(--bg-2);
+  border: 1px solid var(--guide);
+  border-radius: 10px;
+  padding: 1.4rem 1.6rem;
 }
-.md-tool:hover { background: var(--bg-3); color: var(--tx-1); }
-.md-tool.is-active { background: var(--accent); color: var(--bg-1); font-weight: 700; }
-
-.EasyMDEContainer .CodeMirror {
+.tiptap-content {
   min-height: calc(100vh - 320px);
-  font-family: var(--font-mono); font-size: 15px; line-height: 1.7;
-  color: var(--tx-1); background: var(--bg-2);
-  border: 0; border-radius: 10px;
+  outline: none;
 }
-.EasyMDEContainer .CodeMirror-lines { padding: .9rem 1rem; }
-.EasyMDEContainer .CodeMirror-scroll { min-height: calc(100vh - 320px); overflow-x: hidden !important; }
-.EasyMDEContainer .CodeMirror-hscrollbar { display: none !important; }
-.EasyMDEContainer .CodeMirror-cursor { border-left-color: var(--accent); }
-.EasyMDEContainer .CodeMirror-selected { background: var(--sel) !important; }
-.EasyMDEContainer .CodeMirror-placeholder { color: var(--tx-2); }
-.EasyMDEContainer .editor-toolbar { display: none; }
+.tiptap-content:focus { outline: none; }
 
-/* 편집 중에도 서식이 보이도록 */
-.EasyMDEContainer .cm-header-1 { font-size: 1.7em; font-weight: 700; color: var(--accent); line-height: 1.3; }
-.EasyMDEContainer .cm-header-2 { font-size: 1.4em; font-weight: 700; color: var(--accent); line-height: 1.35; }
-.EasyMDEContainer .cm-header-3 { font-size: 1.2em; font-weight: 700; color: var(--accent); }
-.EasyMDEContainer .cm-header-4,
-.EasyMDEContainer .cm-header-5,
-.EasyMDEContainer .cm-header-6 { font-weight: 700; color: var(--accent); }
-.EasyMDEContainer .cm-strong { font-weight: 700; color: var(--tx-1); }
-.EasyMDEContainer .cm-em { font-style: italic; }
-.EasyMDEContainer .cm-link { color: var(--link); }
-.EasyMDEContainer .cm-url { color: var(--tx-2); }
-.EasyMDEContainer .cm-comment {
-  font-family: var(--font-mono); color: var(--syn-string);
-  background: var(--code-bg); border-radius: 4px; padding: .05em .25em;
-}
-.EasyMDEContainer .cm-quote { color: var(--tx-2); font-style: italic; }
-.EasyMDEContainer .cm-formatting { color: var(--tx-2); opacity: .65; }
-
-/* 미리보기 — 조회 화면(.doc-body)과 동일한 서식 */
-.EasyMDEContainer .editor-preview,
-.EasyMDEContainer .editor-preview-side {
-  padding: .9rem 1rem; background: var(--bg-1); color: var(--tx-1); border: 0; border-radius: 10px;
-}
-.EasyMDEContainer .editor-preview > :first-child,
-.EasyMDEContainer .editor-preview-side > :first-child { margin-top: 0; }
-.EasyMDEContainer.sided--no-fullscreen .CodeMirror-sided { border-radius: 10px 0 0 10px; }
-.EasyMDEContainer.sided--no-fullscreen .editor-preview-active-side {
-  min-height: calc(100vh - 320px); overflow: auto;
-  border-left: 1px solid var(--guide); border-radius: 0 10px 10px 0;
+/* Placeholder */
+.tiptap-content p.is-editor-empty:first-child::before,
+.tiptap-content .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--tx-2);
+  pointer-events: none;
 }
 
-/* 드래그 이동 대상 폴더 */
+/* Inline code / code block */
+.tiptap-content code {
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  border-radius: 4px;
+  padding: .05em .3em;
+}
+.tiptap-content pre {
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: .9rem 1rem;
+  overflow-x: auto;
+}
+.tiptap-content pre code { background: none; padding: 0; }
+
+/* Task list */
+.tiptap-content ul[data-type="taskList"] { list-style: none; padding-left: 0; }
+.tiptap-content ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: .5rem; margin: .3rem 0; }
+.tiptap-content ul[data-type="taskList"] li > label { margin-top: .35rem; }
+.tiptap-content ul[data-type="taskList"] li > div { flex: 1 1 auto; }
+
+/* Tables */
+.tiptap-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; table-layout: fixed; }
+.tiptap-content th, .tiptap-content td {
+  border: 1px solid var(--guide); padding: .5rem .6rem; vertical-align: top; position: relative;
+}
+.tiptap-content th { background: var(--bg-3); font-weight: 700; text-align: left; }
+.tiptap-content .selectedCell::after {
+  content: ''; position: absolute; inset: 0; background: var(--sel); opacity: .4; pointer-events: none;
+}
+.tiptap-content .column-resize-handle {
+  position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: var(--accent); cursor: col-resize;
+}
+
+.tiptap-content img { max-width: 100%; height: auto; border-radius: 8px; }
+.tiptap-content hr { border: 0; border-top: 1px solid var(--guide); margin: 1.6rem 0; }
+
+/* Bubble menu */
+.tiptap-bubble-menu {
+  display: flex; gap: .15rem; padding: .25rem;
+  background: var(--bg-1); border: 1px solid var(--guide); border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+}
+.tiptap-bubble-btn {
+  min-width: 30px; height: 30px; padding: 0 .4rem;
+  font-family: inherit; font-size: 13px; color: var(--tx-1);
+  background: transparent; border: 0; border-radius: 6px; cursor: pointer;
+}
+.tiptap-bubble-btn.tt-b-italic { font-style: italic; }
+.tiptap-bubble-btn.tt-b-bold { font-weight: 700; }
+.tiptap-bubble-btn:hover { background: var(--bg-3); }
+.tiptap-bubble-btn.is-active { background: var(--accent); color: var(--bg-1); }
+
+/* Slash command menu */
+.tiptap-slash-menu {
+  display: flex; flex-direction: column; min-width: 200px; max-height: 320px; overflow-y: auto;
+  padding: .3rem; background: var(--bg-1); border: 1px solid var(--guide); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+}
+.tiptap-slash-item {
+  text-align: left; padding: .45rem .6rem; font-family: inherit; font-size: 13.5px; color: var(--tx-1);
+  background: transparent; border: 0; border-radius: 6px; cursor: pointer;
+}
+.tiptap-slash-item:hover, .tiptap-slash-item.is-active { background: var(--bg-3); }
+.tiptap-slash-empty { padding: .45rem .6rem; font-size: 13px; color: var(--tx-2); }
+
+/* Global drag handle */
+.drag-handle {
+  position: fixed; opacity: 1; transition: opacity .2s ease;
+  width: 18px; height: 22px; z-index: 40; cursor: grab;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%2364647a'%3E%3Ccircle cx='9' cy='6' r='1.6'/%3E%3Ccircle cx='15' cy='6' r='1.6'/%3E%3Ccircle cx='9' cy='12' r='1.6'/%3E%3Ccircle cx='15' cy='12' r='1.6'/%3E%3Ccircle cx='9' cy='18' r='1.6'/%3E%3Ccircle cx='15' cy='18' r='1.6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: center; border-radius: 4px;
+}
+.drag-handle:hover { background-color: var(--bg-3); }
+.drag-handle.hide { opacity: 0; pointer-events: none; }
+
+/* Drag target folder in sidebar */
 .tree-dir.drop-target > .tree-toggle {
   background: var(--sel); outline: 1px dashed var(--accent); outline-offset: -1px;
 }

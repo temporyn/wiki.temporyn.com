@@ -1,0 +1,8 @@
+/* Structural styles bundled with the library. Visual theming lives in editor.css. */
+.tippy-box[data-theme~='temporyn-slash'] {
+  background: transparent;
+  box-shadow: none;
+}
+.tippy-box[data-theme~='temporyn-slash'] .tippy-content {
+  padding: 0;
+}

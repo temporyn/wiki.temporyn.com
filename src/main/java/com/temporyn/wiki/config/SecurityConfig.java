@@ -18,6 +18,7 @@ public class SecurityConfig {
             "/error",
             "/favicon.ico",
             "/assets/**",
+            "/lib/**",
             "/login"
     };
 
