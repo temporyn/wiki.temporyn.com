@@ -24,6 +24,10 @@
 }
 .tiptap-content:focus { outline: none; }
 
+/* Read-only view: same pipeline as the editor, without the editing chrome */
+.tiptap-view .tiptap-content { min-height: 0; }
+.tiptap-view .tiptap-content [contenteditable="false"] { cursor: default; }
+
 /* Placeholder */
 .tiptap-content p.is-editor-empty:first-child::before,
 .tiptap-content .is-empty::before {

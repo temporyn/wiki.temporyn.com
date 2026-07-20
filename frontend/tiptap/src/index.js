@@ -83,42 +83,41 @@ function buildBubbleMenu(getEditor) {
 }
 
 export function createNotionEditor(options) {
-  const { element, content = '', placeholder = '내용을 입력하세요…', onUpdate } = options;
+  const { element, content = '', placeholder = '내용을 입력하세요…', editable = true, onUpdate } = options;
 
   let editorRef = null;
-  const bubble = buildBubbleMenu(() => editorRef);
-  const tableMenu = buildTableMenu(() => editorRef);
+  let bubble = null;
 
-  const editor = new Editor({
-    element,
-    content,
-    editorProps: {
-      attributes: { class: 'doc-body tiptap-content' },
-    },
-    extensions: [
-      StarterKit.configure({
-        codeBlock: { HTMLAttributes: { class: 'tiptap-code-block' } },
-      }),
+  const extensions = [
+    StarterKit.configure({
+      codeBlock: { HTMLAttributes: { class: 'tiptap-code-block' } },
+    }),
+    Link.configure({ openOnClick: !editable, autolink: true }),
+    Image.configure({ inline: false, allowBase64: true }),
+    TaskList,
+    TaskItem.configure({ nested: true }),
+    Table.configure({ resizable: editable, allowTableNodeSelection: true }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    Markdown.configure({
+      html: true,
+      transformPastedText: true,
+      transformCopiedText: true,
+      breaks: true,
+    }),
+  ];
+
+  if (editable) {
+    bubble = buildBubbleMenu(() => editorRef);
+    const tableMenu = buildTableMenu(() => editorRef);
+    extensions.push(
       Placeholder.configure({
         placeholder: ({ node }) =>
           node.type.name === 'heading' ? '제목' : placeholder,
         showOnlyWhenEditable: true,
       }),
-      Link.configure({ openOnClick: false, autolink: true }),
-      Image.configure({ inline: false, allowBase64: true }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Table.configure({ resizable: true, allowTableNodeSelection: true }),
-      TableRow,
-      TableHeader,
-      TableCell,
       GlobalDragHandle.configure({ dragHandleWidth: 20, scrollTreshold: 100 }),
-      Markdown.configure({
-        html: true,
-        transformPastedText: true,
-        transformCopiedText: true,
-        breaks: true,
-      }),
       BubbleMenu.configure({
         pluginKey: 'textBubbleMenu',
         element: bubble.element,
@@ -132,11 +131,27 @@ export function createNotionEditor(options) {
         shouldShow: ({ editor: current }) => current.isActive('table'),
         tippyOptions: { duration: 120, placement: 'top', maxWidth: 'none' },
       }),
-      SlashCommand,
-    ],
-    onCreate: () => bubble.syncState(),
-    onSelectionUpdate: () => bubble.syncState(),
-    onTransaction: () => bubble.syncState(),
+      SlashCommand
+    );
+  }
+
+  const editor = new Editor({
+    element,
+    content,
+    editable,
+    editorProps: {
+      attributes: { class: 'doc-body tiptap-content' },
+    },
+    extensions,
+    onCreate: () => {
+      if (bubble) bubble.syncState();
+    },
+    onSelectionUpdate: () => {
+      if (bubble) bubble.syncState();
+    },
+    onTransaction: () => {
+      if (bubble) bubble.syncState();
+    },
     onUpdate: ({ editor: current }) => {
       if (typeof onUpdate === 'function') {
         onUpdate(current.storage.markdown.getMarkdown());

@@ -1,20 +1,35 @@
 (function () {
   'use strict';
 
-  var mount = document.getElementById('tiptap-editor');
-  var hidden = document.getElementById('content');
-  if (!mount || !hidden || !window.TemporynTiptap) return;
+  if (!window.TemporynTiptap) return;
 
-  var instance = window.TemporynTiptap.createNotionEditor({
-    element: mount,
-    content: hidden.value,
-    placeholder: '내용을 입력하세요…',
-  });
+  var editMount = document.getElementById('tiptap-editor');
+  if (editMount) {
+    var hidden = document.getElementById('content');
+    if (!hidden) return;
+    var instance = window.TemporynTiptap.createNotionEditor({
+      element: editMount,
+      content: hidden.value,
+      placeholder: '내용을 입력하세요…',
+      editable: true,
+    });
+    var form = editMount.closest('form');
+    if (form) {
+      form.addEventListener('submit', function () {
+        hidden.value = instance.getMarkdown();
+      });
+    }
+    return;
+  }
 
-  var form = mount.closest('form');
-  if (form) {
-    form.addEventListener('submit', function () {
-      hidden.value = instance.getMarkdown();
+  var viewMount = document.getElementById('tiptap-view');
+  if (viewMount) {
+    var source = document.getElementById('view-content');
+    window.TemporynTiptap.createNotionEditor({
+      element: viewMount,
+      content: source ? source.value : '',
+      editable: false,
     });
   }
 })();
+

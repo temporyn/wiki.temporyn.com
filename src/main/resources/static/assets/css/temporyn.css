@@ -230,15 +230,6 @@ a:hover { text-decoration: underline; }
   margin: 0 .55em 0 0; vertical-align: middle;
   width: 1em; height: 1em; accent-color: var(--accent);
 }
-/* CommonMark task-list output has no classes: match the raw checkbox */
-.doc-body li:has(> input[type="checkbox"]) { position: static; list-style: none; }
-.doc-body li:has(> input[type="checkbox"])::before { content: none; }
-.doc-body li > input[type="checkbox"] {
-  margin: 0 .55em 0 0; vertical-align: middle;
-  width: 1em; height: 1em; accent-color: var(--accent);
-}
-/* Loose lists wrap the label in <p>; keep it inline with the checkbox */
-.doc-body li:has(> input[type="checkbox"]) > p { display: inline; margin: 0; }
 
 /* 정의 목록 */
 .doc-body dl { margin: 1.2rem 0; }

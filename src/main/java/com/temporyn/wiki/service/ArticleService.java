@@ -8,17 +8,14 @@ import org.springframework.stereotype.Service;
 public class ArticleService {
 
     private final VaultService vaultService;
-    private final MarkdownRenderer markdownRenderer;
 
-    public ArticleService(VaultService vaultService, MarkdownRenderer markdownRenderer) {
+    public ArticleService(VaultService vaultService) {
         this.vaultService = vaultService;
-        this.markdownRenderer = markdownRenderer;
     }
 
     public ArticleView getArticleView(String relativePath) {
         String markdown = vaultService.readArticle(relativePath);
-        return new ArticleView(relativePath, titleOf(relativePath), breadcrumbOf(relativePath),
-                markdownRenderer.toHtml(markdown));
+        return new ArticleView(relativePath, titleOf(relativePath), breadcrumbOf(relativePath), markdown);
     }
 
     public ArticleEdit getArticleEdit(String relativePath) {

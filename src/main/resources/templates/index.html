@@ -103,7 +103,8 @@
       <article th:if="${editing == null and article != null}" class="doc">
         <h1 class="doc-title" th:text="${article.title}">title</h1>
         <p class="doc-path" th:text="${article.breadcrumb}">path</p>
-        <div class="doc-body" th:utext="${article.content}">content</div>
+        <textarea id="view-content" hidden th:text="${article.content}"></textarea>
+        <div id="tiptap-view" class="tiptap-view"></div>
       </article>
 
       <div th:if="${editing == null and article == null}" class="placeholder">
