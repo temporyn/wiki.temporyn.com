@@ -56,10 +56,15 @@
 .tiptap-content li > p { margin: 0; }
 
 /* Task list */
-.tiptap-content ul[data-type="taskList"] { list-style: none; padding-left: 0; }
-.tiptap-content ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: .5rem; margin: .3rem 0; }
-.tiptap-content ul[data-type="taskList"] li > label { margin-top: .35rem; }
+.tiptap-content ul[data-type="taskList"] { list-style: none; padding-left: 0; margin: .4rem 0; }
+.tiptap-content ul[data-type="taskList"] li {
+  display: flex; align-items: flex-start; gap: .5rem; margin: .1rem 0; list-style: none;
+}
+.tiptap-content ul[data-type="taskList"] li::marker { content: none; }
+.tiptap-content ul[data-type="taskList"] li::before { content: none; }
+.tiptap-content ul[data-type="taskList"] li > label { margin-top: .2rem; }
 .tiptap-content ul[data-type="taskList"] li > div { flex: 1 1 auto; }
+.tiptap-content ul[data-type="taskList"] li > div > p { margin: 0; }
 
 /* Tables */
 .tiptap-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; table-layout: fixed; }
