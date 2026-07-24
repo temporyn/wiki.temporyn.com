@@ -15,6 +15,7 @@ import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { Markdown } from 'tiptap-markdown';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { all, createLowlight } from 'lowlight';
+import { Plugin } from '@tiptap/pm/state';
 import { SlashCommand } from './slash-command.js';
 import { buildTableMenu } from './table-menu.js';
 
@@ -29,6 +30,25 @@ const ImageUpload = Extension.create({
   name: 'imageUpload',
   addStorage() {
     return { handler: null };
+  },
+});
+
+const CodeBlockPlainCopy = Extension.create({
+  name: 'codeBlockPlainCopy',
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        props: {
+          clipboardTextSerializer: (slice) => {
+            const { content } = slice;
+            if (content.childCount !== 1) return null;
+            const node = content.firstChild;
+            if (node.type.name !== 'codeBlock') return null;
+            return node.textContent;
+          },
+        },
+      }),
+    ];
   },
 });
 
@@ -110,6 +130,7 @@ export function createNotionEditor(options) {
       lowlight,
       HTMLAttributes: { class: 'tiptap-code-block' },
     }),
+    CodeBlockPlainCopy,
     ImageUpload,
     Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener noreferrer' } }),
     Image.configure({ inline: false, allowBase64: true }),
