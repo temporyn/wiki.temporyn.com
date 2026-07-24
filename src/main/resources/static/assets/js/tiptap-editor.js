@@ -56,9 +56,10 @@
   var viewMount = document.getElementById('tiptap-view');
   if (viewMount) {
     var source = document.getElementById('view-content');
+    var raw = source ? source.value : '';
     window.TemporynTiptap.createNotionEditor({
       element: viewMount,
-      content: source ? source.value : '',
+      content: buildIndexMarkdown(raw) + raw,
       editable: false,
     });
     setupHeadingAnchors(viewMount);
@@ -71,6 +72,43 @@
       .toLowerCase()
       .replace(/[^\w\u00c0-\uffff\s-]/g, '')
       .replace(/\s+/g, '-');
+  }
+
+  // Scans raw Markdown (skipping fenced code blocks) for ATX headings (# .. ######).
+  function extractHeadings(markdown) {
+    var headings = [];
+    var inFence = false;
+    var fenceMarker = null;
+    (markdown || '').split(/\r?\n/).forEach(function (line) {
+      var fence = line.match(/^\s*(`{3,}|~{3,})/);
+      if (fence) {
+        if (!inFence) { inFence = true; fenceMarker = fence[1].charAt(0); }
+        else if (line.trim().charAt(0) === fenceMarker) { inFence = false; }
+        return;
+      }
+      if (inFence) return;
+      var heading = line.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
+      if (heading) headings.push({ depth: heading[1].length, text: heading[2].trim() });
+    });
+    return headings;
+  }
+
+  // "---" hr, a bold-italic "index" label, then one link per heading; depth 2+
+  // gets a dash prefix repeated (depth - 1) times so nesting reads without an indented list.
+  function buildIndexMarkdown(markdown) {
+    var headings = extractHeadings(markdown);
+    if (!headings.length) return '';
+    var used = Object.create(null);
+    var lines = headings.map(function (h) {
+      var base = slugify(h.text);
+      var slug = base;
+      var n = 1;
+      while (used[slug]) { slug = base + '-' + n; n += 1; }
+      used[slug] = true;
+      var prefix = h.depth > 1 ? new Array(h.depth).join('\u2500') : '';
+      return '[' + prefix + h.text + '](#' + slug + ')';
+    });
+    return '---\n\n***index***\n\n' + lines.join('\n') + '\n\n---\n\n';
   }
 
   function setupHeadingAnchors(root) {
